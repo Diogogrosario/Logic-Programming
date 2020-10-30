@@ -22,7 +22,7 @@ Outros átomos são usados apenas para facilitar a representação do board tend
 ```prolog
 cell_val(orangeBoardSpace,'org').
 cell_val(orangeBoardNodef,'   org').
-cell_val(greeneBoardSpace,'grn').
+cell_val(greenBoardSpace,'grn').
 cell_val(greenBoardNodef,'   grn').
 cell_val(purpleBoardNodef,'prp  ').
 cell_val(orange, 'O').
