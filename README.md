@@ -55,4 +55,4 @@ no caso da peça colocado nessa célula ser laranja. Já o display_bottom imprim
 
 ### Estado final
 ![Final Board Representation](./images/endBoard.png) <br />
-Neste caso, o jogador 2 ganhou, visto que bloqueou a cor laranja do jogador 1 (é inacessível ao jogador 1 pois a aliança da cor laranja é verde e terá sempre uma linha roxa a bloquear) e uniu com sucesso a cor verde usando verdes e as suas alianças (neste caso, laranja).
+Neste caso, o jogador 2 ganhou, visto que bloqueou a cor roxa do jogador 1 (é inacessível ao jogador 1 pois a aliança da cor roxa é laranja e terá sempre uma linha verde a bloquear) e uniu com sucesso a cor verde usando verdes e as suas alianças (neste caso, laranja).
