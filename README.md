@@ -1,6 +1,6 @@
 # Alliances-5
 
-## Grupo A_5 Turma 3
+## Grupo Alliances_5 Turma 3
 Diogo Guimarães do Rosário - 201806582  
 Henrique Melo Ribeiro - 201806529
 
