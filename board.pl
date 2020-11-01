@@ -2,7 +2,7 @@
 :- dynamic initial/1.
 
 initial([
-    [nodef, nodef, nodef, nodef, nodef, purpleBoardNodef, purpleBoardNodef, purpleBoardNodef, purpleBoardNodef, purpleBoardNodef, nodef, nodef, nodef, nodef],
+    [nodef, nodef, nodef, nodef, nodef, purpleBoardNodef, purpleBoardNodef, purpleBoardNodef, purpleBoardNodef,    purpleBoardNodef, nodef, nodef, nodef, nodef],
     [nodef, nodef, nodef, nodef, space,                 empty, empty, empty, empty, empty,                         nodef, nodef, nodef, nodef],
     [nodef, nodef, orangeBoardNodef,         empty, empty, empty, empty, empty, empty, empty, empty,               greenBoardSpace, nodef, nodef],
     [nodef, nodef, orangeBoardSpace,      empty, empty, empty, empty, empty, empty, empty, empty, empty,           greenBoardSpace, nodef],
@@ -16,10 +16,22 @@ initial([
     [nodef, nodef, greenBoardSpace,       empty, empty, empty, empty, empty, empty, empty, empty, empty,           orangeBoardSpace, nodef],
     [nodef, nodef, greenBoardNodef,          empty, empty, empty, empty, empty, empty, empty, empty,               orangeBoardSpace, nodef, nodef],
     [nodef, nodef, nodef, nodef, space,                 empty, empty, empty, empty, empty,                         nodef, nodef, nodef, nodef],
-    [nodef, nodef, nodef, nodef, nodef, purpleBoardNodef, purpleBoardNodef, purpleBoardNodef, purpleBoardNodef, purpleBoardNodef, nodef, nodef, nodef, nodef]
+    [nodef, nodef, nodef, nodef, nodef, purpleBoardNodef, purpleBoardNodef, purpleBoardNodef, purpleBoardNodef,    purpleBoardNodef, nodef, nodef, nodef, nodef]
 ]).
 
 player(0).
+
+check_piece(empty).
+check_piece(orange).
+check_piece(green).
+check_piece(purple).
+
+check_endBoard_space(orangeBoardSpace).
+check_endBoard_space(greenBoardSpace).
+
+check_endBoard_nodef(orangeBoardNodef).
+check_endBoard_nodef(greenBoardNodef).
+check_endBoard_nodef(purpleBoardNodef).
 
 cell_val(orangeBoardSpace,'org').
 cell_val(orangeBoardNodef,'   org').
@@ -39,8 +51,16 @@ display_top(H) :-
     [V | T] = H,
     (
         (
-            (V=empty;V=orange;V=green;V=purple),
+            check_piece(V),
             write(' ____ ')
+        );
+        (
+            check_endBoard_nodef(V),
+            write('      ')
+        );
+        (
+            check_endBoard_space(V),
+            write('   ')
         );
         (
             cell_val(V,X),
@@ -54,7 +74,7 @@ display_mid(H) :-
     [V | T] = H,
     (
         (
-            (V=empty;V=orange;V=green;V=purple),
+            check_piece(V),
             cell_val(V,X),
             put_code(9585),write(' '), write(X), write('  ') , put_code(9586)
         );
@@ -71,9 +91,17 @@ display_bottom(H) :-
     [V | T] = H,
     (
         (
-            (V=empty;V=orange;V=green;V=purple),
+            check_piece(V),
             cell_val(V,X),
             put_code(9586),write('____') , put_code(9585)
+        );
+        (
+            check_endBoard_nodef(V),
+            write('      ')
+        );
+        (
+            check_endBoard_space(V),
+            write('   ')
         );
         (
             cell_val(V,X),

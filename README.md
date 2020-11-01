@@ -14,7 +14,7 @@ As peças podem ser colocadas em qualquer casa vazia.
 
 ## Representação interna do jogo
 É usada uma lista de listas para guardar o estado do jogo. <br /><br />
-### Estado Inicial
+### Estado inicial
 ![Initial Board Representation](./images/initialBoard.png) <br />
 O jogador atual e o número de peças restantes de cada cor são representados no fundo do board, bem como as alianças para as cores de cada jogador.
 As casas vazias são representados pelo valor empty, enquanto que as peças são representadas por 1 dos 3 seguintes valores - orange, green, purple. 
@@ -50,9 +50,11 @@ Estes 3 predicados são responsáveis por ler o valor de cada célula da lista H
 por exemplo, para o hexágono o display_top imprime uma sequência de ____ enquanto que o display_mid imprime / O \\, 
 no caso da peça colocado nessa célula ser laranja. Já o display_bottom imprime \\___/ de modo a fechar o hexágono.
 
-### Estado Intermédio
+### Estado intermédio
 ![Mid Board Representation](./images/midBoard.png) <br />
 
 ### Estado final
 ![Final Board Representation](./images/endBoard.png) <br />
 Neste caso, o jogador 2 ganhou, visto que bloqueou a cor roxa do jogador 1 (é inacessível ao jogador 1 pois a aliança da cor roxa é laranja e terá sempre uma linha verde a bloquear) e uniu com sucesso a cor verde usando verdes e as suas alianças (neste caso, laranja).
+
+Nota: A representação do estado intermédio e final do jogo foram feitas antes da alteração feita às cores laterais do tabuleiro.
