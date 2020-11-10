@@ -1,22 +1,3 @@
-
-% oldBoard([
-%     [nodef, nodef, nodef, nodef, nodef, purpleBoardNodef, purpleBoardNodef, purpleBoardNodef, purpleBoardNodef,    purpleBoardNodef, nodef, nodef, nodef, nodef],
-%     [nodef, nodef, nodef, nodef, space,                 empty, empty, empty, empty, empty,                         nodef, nodef, nodef, nodef],
-%     [nodef, nodef, orangeBoardNodef,         empty, empty, empty, empty, empty, empty, empty, empty,               greenBoardSpace, nodef, nodef],
-%     [nodef, nodef, orangeBoardSpace,      empty, empty, empty, empty, empty, empty, empty, empty, empty,           greenBoardSpace, nodef],
-%     [nodef, orangeBoardNodef,          empty, empty, empty, empty, empty, empty, empty, empty, empty, empty,       greenBoardSpace, nodef],
-%     [nodef, orangeBoardSpace,      empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty,    greenBoardSpace],
-%     [orangeBoardNodef,         empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, greenBoardSpace],
-%     [nodef, space,               empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty,      nodef],
-%     [greenBoardNodef,          empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, orangeBoardSpace],
-%     [nodef, greenBoardSpace,      empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty,     orangeBoardSpace],
-%     [nodef, greenBoardNodef,           empty, empty, empty, empty, empty, empty, empty, empty, empty, empty,       orangeBoardSpace, nodef],
-%     [nodef, nodef, greenBoardSpace,       empty, empty, empty, empty, empty, empty, empty, empty, empty,           orangeBoardSpace, nodef],
-%     [nodef, nodef, greenBoardNodef,          empty, empty, empty, empty, empty, empty, empty, empty,               orangeBoardSpace, nodef, nodef],
-%     [nodef, nodef, nodef, nodef, space,                 empty, empty, empty, empty, empty,                         nodef, nodef, nodef, nodef],
-%     [nodef, nodef, nodef, nodef, nodef, purpleBoardNodef, purpleBoardNodef, purpleBoardNodef, purpleBoardNodef,    purpleBoardNodef, nodef, nodef, nodef, nodef]
-% ]).
-
 :- dynamic player/1.
 
 player(0).
@@ -35,31 +16,24 @@ initial([
         [empty,empty,empty,empty,empty],               %odd
       [empty,empty,empty,empty,empty,empty],           %even
         [empty,empty,empty,empty,empty],               %odd
-      [empty,empty,empty,empty,empty,empty],           %even
+      [empty,empty,empty,orange,empty,empty],           %even
     [empty,empty,empty,empty,empty,empty,empty],       %odd
       [empty,empty,empty,empty,empty,empty],           %even
     [empty,empty,empty,empty,empty,empty,empty],       %odd
       [empty,empty,empty,empty,empty,empty],           %even
     [empty,empty,empty,empty,empty,empty,empty],
-      [empty,empty,empty,empty,empty,empty],
+      [empty,green,empty,empty,empty,empty],
     [empty,empty,empty,empty,empty,empty,empty],
       [empty,empty,empty,empty,empty,empty],
-    [empty,empty,empty,empty,empty,empty,empty],
+    [empty,empty,purple,empty,empty,empty,empty],
       [empty,empty,empty,empty,empty,empty],
         [empty,empty,empty,empty,empty],
       [empty,empty,empty,empty,empty,empty],
         [empty,empty,empty,empty,empty],
           [empty,empty,empty,empty],
             [empty,empty,empty],
-              [empty,empty]
+              [orange,orange]
 ]).
-
-
-    %         ___     ___
-    %     ___/   \___/   \___
-    % ___/   \___/   \___/   \___
-    %    \___/   \___/   \___/
-    %        \___/   \___/   \___/
 
 
 cell_val(orange, 'O').
@@ -80,18 +54,53 @@ even_row(18).
 even_row(20).
 even_row(22).
 
-odd_row(1).
-odd_row(3).
-odd_row(5).
-odd_row(7).
-odd_row(9).
-odd_row(11).
-odd_row(13).
-odd_row(15).
-odd_row(17).
-odd_row(19).
-odd_row(21).
-odd_row(23).
+start_value(0,'    ___/ ').
+start_value(1,'    ___/ ').
+start_value(2,'org ___/ ').
+start_value(3,'    ___/ ').
+start_value(4,'       / ').
+start_value(5,'   \\___/ ').
+start_value(6,'    ___/ ').
+start_value(7,'       / ').
+start_value(8,'   \\___/ ').
+start_value(9,'       / ').
+start_value(10,'   \\___/ ').
+start_value(11,'   grn / ').
+start_value(12,'   \\___/ ').
+start_value(13,'       / ').
+start_value(14,'   \\___/ ').
+start_value(15,'       / ').
+start_value(16,'   \\___/ ').
+start_value(17,'   \\___/ ').
+start_value(18,'       / ').
+start_value(19,'   \\___/ ').
+start_value(20,'   \\___/ ').
+start_value(21,'prp\\___/ ').
+start_value(22,'   \\___/ ').
+
+end_value(0,'___    ').
+end_value(1,'___    ').
+end_value(2,'___ prp').
+end_value(3,'___    ').
+end_value(4,'    ').
+end_value(5,'___/    ').
+end_value(6,'___    ').
+end_value(7,'    ').
+end_value(8,'___/    ').
+end_value(9,'    ').
+end_value(10,'___/    ').
+end_value(11,' grn').
+end_value(12,'___/    ').
+end_value(13,'    ').
+end_value(14,'___/    ').
+end_value(15,'    ').
+end_value(16,'___/    ').
+end_value(17,'___/    ').
+end_value(18,'    ').
+end_value(19,'___/    ').
+end_value(20,'___/    ').
+end_value(21,'___/ org').
+end_value(22,'___/    ').
 
 max_length_odd(7).    
 max_length_even(6).
@@ -106,14 +115,21 @@ display_top([]).
 display_top(H) :-
     display_top(T).
 
-display_piece([],NRow).
-display_piece(H,Nrow) :-
+display_piece([],Nrow,NPiece).
+display_piece(H,Nrow,NPiece) :-
     [V | T] = H,
-    write('___/ '),
+    (
+      (
+        (NPiece == 0),
+        start_value(Nrow,X),
+        write(X)
+      );
+      write('___/ ')
+    ),
     cell_val(V,Piece),
     write(Piece),
     write(' \\'),
-    display_piece(T,Nrow).
+    display_piece(T,Nrow,1).
 
 
 display_bottom([]).
@@ -121,10 +137,17 @@ display_bottom(H) :-
     display_bottom(T).
 
 close_hex_top:-
-    writeNspaces(24),
+    writeNspaces(28),
     write('___'),
     writeNspaces(5),
     write('___'), nl.
+
+close_hex_bot:-
+    writeNspaces(27),
+    write('\\___/'),
+    writeNspaces(3),
+    write('\\___/'), nl.
+
 
 display_line(H,NRow) :-
     %display_top(H), nl,
@@ -143,8 +166,9 @@ display_line(H,NRow) :-
         writeNspaces(N)
       )
     ),
-    display_piece(H,NRow), 
-    write('___'),
+    display_piece(H,NRow,0), 
+    end_value(NRow,Line),
+    write(Line),
     write('       '), write(NRow), nl.
     %display_bottom(H), nl.
     
@@ -172,10 +196,12 @@ display_alliances:-
 display_game(GameState,Player):-
     close_hex_top,
     display_board(GameState,Player,0),
+    close_hex_bot,
     display_player(Player),
     display_remaining_pieces,
     display_alliances,
     update_player(Player).
+
 
 play :-
     player(Player),
