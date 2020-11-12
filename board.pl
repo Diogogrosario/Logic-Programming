@@ -41,6 +41,30 @@ cell_val(green, 'G').
 cell_val(purple, 'P').
 cell_val(empty, ' ').
 
+diagonal_index(0,0).
+diagonal_index(1,0).
+diagonal_index(2,0).
+diagonal_index(3,0).
+diagonal_index(4,0).
+diagonal_index(5,1).
+diagonal_index(6,1).
+diagonal_index(7,1).
+diagonal_index(8,2).
+diagonal_index(9,2).
+diagonal_index(10,3).
+diagonal_index(11,3).
+diagonal_index(12,4).
+diagonal_index(13,4).
+diagonal_index(14,5).
+diagonal_index(15,5).
+diagonal_index(16,6).
+diagonal_index(17,7).
+diagonal_index(18,7).
+diagonal_index(19,8).
+diagonal_index(20,9).
+diagonal_index(21,10).
+diagonal_index(22,11).
+
 even_row(0).
 even_row(2).
 even_row(4).
@@ -102,6 +126,15 @@ end_value(20,'___/    ').
 end_value(21,'___/ org').
 end_value(22,'___/    ').
 
+
+% gotten from https://stackoverflow.com/questions/8519203/prolog-replace-an-element-in-a-list-at-a-specified-index/8544713
+replace_val([_|T], 0, X, [X|T]).
+replace_val([H|T], I, X, [H|R]):- 
+  I > 0, 
+  I1 is I-1, 
+  replace_val(T, I1, X, R).
+
+
 max_length_odd(7).    
 max_length_even(6).
 
@@ -109,7 +142,15 @@ writeNspaces(0).
 writeNspaces(X):-
     write(' '),
     NX is X-1,
-    writeNspaces(NX).
+    (
+      (
+        NX<0,
+        writeNspaces(0)
+      );
+      (
+        writeNspaces(NX)
+      )
+    ).
 
 display_top([]).
 display_top(H) :-
@@ -137,9 +178,11 @@ display_bottom(H) :-
     display_bottom(T).
 
 close_hex_top:-
-    writeNspaces(28),
+    S is 28,
+    writeNspaces(S),
     write('___'),
-    writeNspaces(5),
+    M is 5,
+    writeNspaces(M),
     write('___'), nl.
 
 close_hex_bot:-
@@ -199,12 +242,91 @@ display_game(GameState,Player):-
     close_hex_bot,
     display_player(Player),
     display_remaining_pieces,
-    display_alliances,
-    update_player(Player).
+    display_alliances.
 
+valid_line(Line):-
+    number(Line),
+    Line >= 0,
+    Line =< 22.
+  
+valid_diagonal(Diagonal):-
+    number(Diagonal),
+    Diagonal >= 0,
+    Diagonal =< 12.
+
+valid_color(Color):-
+    atom(Color),
+    (
+      Color == 'O';
+      Color == 'G';
+      Color == 'P'
+    ).
+
+get_line(Line):-
+    repeat,
+        write('Insert move line (0-22): '),
+        read(Line),
+        valid_line(Line),!.
+
+get_diagonal(Diagonal):-
+    repeat,
+        write('Insert move diagonal (0-12): '),
+        read(Diagonal),
+        valid_diagonal(Diagonal),!.
+  
+get_color(Color):-
+    repeat,
+        write('Insert move color (O,P,G): '),
+        read(Aux),
+        valid_color(Aux),
+        (
+          (
+            Aux == 'O',
+            Color = orange
+          );
+          (
+            Aux == 'P',
+            Color = purple
+          );
+          (
+            Aux == 'G',
+            Color = green
+          )
+        ),!.
+
+get_move([Line,Diagonal,Color]):-
+    get_line(Line), 
+    get_diagonal(Diagonal), 
+    get_color(Color).
+
+getRow([Row|T],0,Row,[NewRow|T],Move):-
+    [InitialRow|V] = Move,
+    [Diagonal|R] = V,
+    diagonal_index(InitialRow,X),
+    Replace is Diagonal-X,
+    [Color|H] = R,
+    replace_val(Row,Replace,Color,NewRow).
+
+getRow([H|T],RowNumber,Row,[H|NewGameState],Move):-
+    NewRowNumber is RowNumber-1,
+    getRow(T,NewRowNumber,Row,NewGameState,Move).
+
+move(GameState, Move, NewGameState):-
+    [RowNumber|T] = Move,
+    diagonal_index(RowNumber,FirstDiagonalIndex),
+    getRow(GameState,RowNumber,Row,NewGameState,Move).
+
+game_loop(GameState,Player):-
+    display_game(GameState,Player),
+    get_move(Move),
+    move(GameState, Move, NewGameState),
+    update_player(Player),
+    game_loop(NewGameState,Player).
+      
 
 play :-
+    prompt(_,''),
     player(Player),
     initial(GameState),
-    display_game(GameState,Player).
+    game_loop(GameState,Player).
     
