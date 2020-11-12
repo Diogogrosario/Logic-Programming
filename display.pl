@@ -156,7 +156,7 @@ writeNspaces(X):-
       )
     ).
 
-display_piece([],Nrow,NPiece).
+display_piece([],_,_).
 display_piece(H,Nrow,NPiece) :-
     [V | T] = H,
     (
@@ -209,7 +209,7 @@ display_line(H,NRow) :-
     write('   '), write(NRow), nl.
     
 
-display_board([],Player,NewRow).
+display_board([],_,_).
 display_board(GameState,Player,NRow) :-
     [H | T] = GameState,
     display_line(H,NRow),

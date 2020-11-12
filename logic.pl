@@ -17,22 +17,21 @@ replace_val([H|T], I, X, [H|R]):-
   I1 is I-1, 
   replace_val(T, I1, X, R).
 
-getRow([Row|T],0,Row,[NewRow|T],Move):-
+getRow([Row|T],0,[NewRow|T],Move):-
     [InitialRow|V] = Move,
     [Diagonal|R] = V,
     diagonal_index(InitialRow,X),
     Replace is Diagonal-X,
-    [Color|H] = R,
+    [Color|_] = R,
     replace_val(Row,Replace,Color,NewRow).
 
-getRow([H|T],RowNumber,Row,[H|NewGameState],Move):-
+getRow([H|T],RowNumber,[H|NewGameState],Move):-
     NewRowNumber is RowNumber-1,
-    getRow(T,NewRowNumber,Row,NewGameState,Move).
+    getRow(T,NewRowNumber,NewGameState,Move).
 
 move(GameState, Move, NewGameState):-
-    [RowNumber|T] = Move,
-    diagonal_index(RowNumber,FirstDiagonalIndex),
-    getRow(GameState,RowNumber,Row,NewGameState,Move).
+    [RowNumber|_] = Move,
+    getRow(GameState,RowNumber,NewGameState,Move).
 
 game_loop(GameState,Player):-
     display_game(GameState,Player),

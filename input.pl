@@ -34,7 +34,7 @@ get_diagonal(Diagonal, Line):-
   
 get_color(Color):-
     repeat,
-        write('Insert move color (O,P,G): '),
+        write('Insert move color (\'O\',\'P\',\'G\'): '),
         read(Aux),
         valid_color(Aux),
         (
