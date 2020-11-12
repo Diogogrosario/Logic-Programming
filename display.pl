@@ -1,15 +1,3 @@
-:- use_module(library(lists)).
-
-:- dynamic player/1.
-
-player(0).
-
-update_player(Player):-
-    P is mod(Player+1,2),
-    retract(player(_)),
-    assert(player(P)).
-
-:- dynamic initial/1.
 
 initial([
               [empty,empty],                           %even
@@ -36,7 +24,6 @@ initial([
             [empty,empty,empty],
               [orange,orange]
 ]).
-
 
 cell_val(orange, 'O').
 cell_val(green, 'G').
@@ -152,15 +139,6 @@ end_value(20,'___/             ').
 end_value(21,'___/ org             ').
 end_value(22,'___/                     ').
 
-
-% gotten from https://stackoverflow.com/questions/8519203/prolog-replace-an-element-in-a-list-at-a-specified-index/8544713
-replace_val([_|T], 0, X, [X|T]).
-replace_val([H|T], I, X, [H|R]):- 
-  I > 0, 
-  I1 is I-1, 
-  replace_val(T, I1, X, R).
-
-
 max_length_odd(7).    
 max_length_even(6).
 
@@ -177,10 +155,6 @@ writeNspaces(X):-
         writeNspaces(NX)
       )
     ).
-
-display_top([]).
-display_top(H) :-
-    display_top(T).
 
 display_piece([],Nrow,NPiece).
 display_piece(H,Nrow,NPiece) :-
@@ -199,10 +173,6 @@ display_piece(H,Nrow,NPiece) :-
     display_piece(T,Nrow,1).
 
 
-display_bottom([]).
-display_bottom(H) :-
-    display_bottom(T).
-
 close_hex_top:-
     writeNspaces(31), write('Column'),writeNspaces(31),write('Line'),nl,
     writeNspaces(28),
@@ -218,7 +188,6 @@ close_hex_bot:-
 
 
 display_line(H,NRow) :-
-    %display_top(H), nl,
 
     length(H,L),
     (
@@ -238,7 +207,6 @@ display_line(H,NRow) :-
     end_value(NRow,Line),
     write(Line),
     write('   '), write(NRow), nl.
-    %display_bottom(H), nl.
     
 
 display_board([],Player,NewRow).
@@ -269,108 +237,3 @@ display_game(GameState,Player):-
     display_remaining_pieces,
     display_alliances.
 
-valid_line(Line):-
-    number(Line),
-    Line >= 0,
-    Line =< 22.
-  
-valid_diagonal(Diagonal, D1, D2):-
-    number(Diagonal),
-    Diagonal >= D1,
-    Diagonal =< D2.
-
-valid_color(Color):-
-    atom(Color),
-    (
-      Color == 'O';
-      Color == 'G';
-      Color == 'P'
-    ).
-
-get_line(Line):-
-    repeat,
-        write('Insert move line (0-22): '),
-        read(Line),
-        valid_line(Line),!.
-
-get_diagonal(Diagonal, Line):-
-    diagonal_index(Line, D1),
-    diagonal_index_end(Line, D2),
-    repeat,
-        write('Insert move diagonal ('), write(D1), write('-'), write(D2), write(') :'),
-        read(Diagonal),
-        valid_diagonal(Diagonal,D1,D2),!.
-  
-get_color(Color):-
-    repeat,
-        write('Insert move color (O,P,G): '),
-        read(Aux),
-        valid_color(Aux),
-        (
-          (
-            Aux == 'O',
-            Color = orange
-          );
-          (
-            Aux == 'P',
-            Color = purple
-          );
-          (
-            Aux == 'G',
-            Color = green
-          )
-        ),!.
-
-is_empty(Line,Diagonal,GameState):-
-    nth0(Line,GameState,Row),
-    diagonal_index(Line,X),
-    Diagonal_index_in_row is X - Diagonal,
-    nth0(Diagonal_index_in_row,Row,Elem),
-    (
-      (
-        Elem == empty
-      );
-      (
-        write('Invalid move, tile is not empty.'), nl,
-        fail
-      )
-    ).
-
-get_move([Line,Diagonal,Color],GameState):-
-    repeat,
-        get_line(Line), 
-        get_diagonal(Diagonal, Line),
-        is_empty(Line,Diagonal,GameState),!, 
-    get_color(Color).
-
-getRow([Row|T],0,Row,[NewRow|T],Move):-
-    [InitialRow|V] = Move,
-    [Diagonal|R] = V,
-    diagonal_index(InitialRow,X),
-    Replace is Diagonal-X,
-    [Color|H] = R,
-    replace_val(Row,Replace,Color,NewRow).
-
-getRow([H|T],RowNumber,Row,[H|NewGameState],Move):-
-    NewRowNumber is RowNumber-1,
-    getRow(T,NewRowNumber,Row,NewGameState,Move).
-
-move(GameState, Move, NewGameState):-
-    [RowNumber|T] = Move,
-    diagonal_index(RowNumber,FirstDiagonalIndex),
-    getRow(GameState,RowNumber,Row,NewGameState,Move).
-
-game_loop(GameState,Player):-
-    display_game(GameState,Player),
-    % get_move(Move,GameState),
-    % move(GameState, Move, NewGameState),
-    update_player(Player). %,
-    % game_loop(NewGameState,Player).
-      
-
-play :-
-    prompt(_,''),
-    player(Player),
-    initial(GameState),
-    game_loop(GameState,Player).
-    
