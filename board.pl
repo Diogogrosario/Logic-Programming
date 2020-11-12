@@ -1,3 +1,5 @@
+:- use_module(library(lists)).
+
 :- dynamic player/1.
 
 player(0).
@@ -65,6 +67,30 @@ diagonal_index(20,9).
 diagonal_index(21,10).
 diagonal_index(22,11).
 
+diagonal_index_end(0,1).
+diagonal_index_end(1,2).
+diagonal_index_end(2,3).
+diagonal_index_end(3,4).
+diagonal_index_end(4,5).
+diagonal_index_end(5,5).
+diagonal_index_end(6,6).
+diagonal_index_end(7,7).
+diagonal_index_end(8,7).
+diagonal_index_end(9,8).
+diagonal_index_end(10,8).
+diagonal_index_end(11,9).
+diagonal_index_end(12,9).
+diagonal_index_end(13,10).
+diagonal_index_end(14,10).
+diagonal_index_end(15,11).
+diagonal_index_end(16,11).
+diagonal_index_end(17,11).
+diagonal_index_end(18,12).
+diagonal_index_end(19,12).
+diagonal_index_end(20,12).
+diagonal_index_end(21,12).
+diagonal_index_end(22,12).
+
 even_row(0).
 even_row(2).
 even_row(4).
@@ -79,8 +105,8 @@ even_row(20).
 even_row(22).
 
 start_value(0,'    ___/ ').
-start_value(1,'    ___/ ').
-start_value(2,'org ___/ ').
+start_value(1,'org ___/ ').
+start_value(2,'    ___/ ').
 start_value(3,'    ___/ ').
 start_value(4,'       / ').
 start_value(5,'   \\___/ ').
@@ -102,29 +128,29 @@ start_value(20,'   \\___/ ').
 start_value(21,'prp\\___/ ').
 start_value(22,'   \\___/ ').
 
-end_value(0,'___    ').
-end_value(1,'___    ').
-end_value(2,'___ prp').
-end_value(3,'___    ').
-end_value(4,'    ').
-end_value(5,'___/    ').
-end_value(6,'___    ').
-end_value(7,'    ').
-end_value(8,'___/    ').
-end_value(9,'    ').
-end_value(10,'___/    ').
-end_value(11,' grn').
-end_value(12,'___/    ').
-end_value(13,'    ').
-end_value(14,'___/    ').
-end_value(15,'    ').
-end_value(16,'___/    ').
-end_value(17,'___/    ').
-end_value(18,'    ').
-end_value(19,'___/    ').
-end_value(20,'___/    ').
-end_value(21,'___/ org').
-end_value(22,'___/    ').
+end_value(0,'___2                     ').
+end_value(1,'___3   prp           ').
+end_value(2,'___4             ').
+end_value(3,'___5         ').
+end_value(4,'         ').
+end_value(5,'___/6        ').
+end_value(6,'___      ').
+end_value(7,'7    ').
+end_value(8,'___/     ').
+end_value(9,'8    ').
+end_value(10,'___/     ').
+end_value(11,'9 grn').
+end_value(12,'___/     ').
+end_value(13,'10   ').
+end_value(14,'___/     ').
+end_value(15,'11   ').
+end_value(16,'___/     ').
+end_value(17,'___/         ').
+end_value(18,'12       ').
+end_value(19,'___/         ').
+end_value(20,'___/             ').
+end_value(21,'___/ org             ').
+end_value(22,'___/                     ').
 
 
 % gotten from https://stackoverflow.com/questions/8519203/prolog-replace-an-element-in-a-list-at-a-specified-index/8544713
@@ -178,12 +204,11 @@ display_bottom(H) :-
     display_bottom(T).
 
 close_hex_top:-
-    S is 28,
-    writeNspaces(S),
-    write('___'),
-    M is 5,
-    writeNspaces(M),
-    write('___'), nl.
+    writeNspaces(31), write('Column'),writeNspaces(31),write('Line'),nl,
+    writeNspaces(28),
+    write('___0'),
+    writeNspaces(4),
+    write('___1'), nl.
 
 close_hex_bot:-
     writeNspaces(27),
@@ -212,7 +237,7 @@ display_line(H,NRow) :-
     display_piece(H,NRow,0), 
     end_value(NRow,Line),
     write(Line),
-    write('       '), write(NRow), nl.
+    write('   '), write(NRow), nl.
     %display_bottom(H), nl.
     
 
@@ -249,10 +274,10 @@ valid_line(Line):-
     Line >= 0,
     Line =< 22.
   
-valid_diagonal(Diagonal):-
+valid_diagonal(Diagonal, D1, D2):-
     number(Diagonal),
-    Diagonal >= 0,
-    Diagonal =< 12.
+    Diagonal >= D1,
+    Diagonal =< D2.
 
 valid_color(Color):-
     atom(Color),
@@ -268,11 +293,13 @@ get_line(Line):-
         read(Line),
         valid_line(Line),!.
 
-get_diagonal(Diagonal):-
+get_diagonal(Diagonal, Line):-
+    diagonal_index(Line, D1),
+    diagonal_index_end(Line, D2),
     repeat,
-        write('Insert move diagonal (0-12): '),
+        write('Insert move diagonal ('), write(D1), write('-'), write(D2), write(') :'),
         read(Diagonal),
-        valid_diagonal(Diagonal),!.
+        valid_diagonal(Diagonal,D1,D2),!.
   
 get_color(Color):-
     repeat,
@@ -294,9 +321,26 @@ get_color(Color):-
           )
         ),!.
 
-get_move([Line,Diagonal,Color]):-
-    get_line(Line), 
-    get_diagonal(Diagonal), 
+is_empty(Line,Diagonal,GameState):-
+    nth0(Line,GameState,Row),
+    diagonal_index(Line,X),
+    Diagonal_index_in_row is X - Diagonal,
+    nth0(Diagonal_index_in_row,Row,Elem),
+    (
+      (
+        Elem == empty
+      );
+      (
+        write('Invalid move, tile is not empty.'), nl,
+        fail
+      )
+    ).
+
+get_move([Line,Diagonal,Color],GameState):-
+    repeat,
+        get_line(Line), 
+        get_diagonal(Diagonal, Line),
+        is_empty(Line,Diagonal,GameState),!, 
     get_color(Color).
 
 getRow([Row|T],0,Row,[NewRow|T],Move):-
@@ -318,10 +362,10 @@ move(GameState, Move, NewGameState):-
 
 game_loop(GameState,Player):-
     display_game(GameState,Player),
-    get_move(Move),
-    move(GameState, Move, NewGameState),
-    update_player(Player),
-    game_loop(NewGameState,Player).
+    % get_move(Move,GameState),
+    % move(GameState, Move, NewGameState),
+    update_player(Player). %,
+    % game_loop(NewGameState,Player).
       
 
 play :-
