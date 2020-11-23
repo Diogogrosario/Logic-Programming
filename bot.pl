@@ -228,12 +228,17 @@ getPathLength(Board,ToVisit,LastVisited,Allied,CheckingColor,CurrentDepth,Depth)
     remove_list(Aux,NewVisited,NextListOfTiles),
     (
         (
-            CurrentDepth =:= 0,
-            getPathLength(Board,ToVisit,[],Allied,CheckingColor,1,Depth)
-        );
-        (
             \+stopCondition(CheckingColor,FinishedLevel),
-            getPathLength(Board,NextListOfTiles,NewVisited,Allied,CheckingColor,NewDepth,Depth)
+            (
+                (
+                    CurrentDepth > 0,
+                    getPathLength(Board,NextListOfTiles,NewVisited,Allied,CheckingColor,NewDepth,Depth)
+                );
+                (
+                    CurrentDepth =:= 0,
+                    getPathLength(Board,ToVisit,[],Allied,CheckingColor,1,Depth)
+                )
+            )
         );
         (
             !,Depth is CurrentDepth
