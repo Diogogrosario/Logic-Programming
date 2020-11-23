@@ -101,22 +101,22 @@ getPathValue(Player,ColorsWon,Board,PathValue):-
 getOrangePathLength(Player,Board,Length):-
     ToVisit = [[0,0],[1,0],[2,0],[3,0],[4,0]],
     allied(Player,orange,Allied),
-    getPathLength(Board,ToVisit,[],Allied,orange,1,Length).
+    getPathLength(Board,ToVisit,[],Allied,orange,0,Length).
 
 
 getPurplePathLength(Player,Board,Length):-
     ToVisit = [[18,7],[19,8],[20,9],[21,10],[22,11]],
     allied(Player,purple,Allied),
-    getPathLength(Board,ToVisit,[],Allied,purple,1,Length).
+    getPathLength(Board,ToVisit,[],Allied,purple,0,Length).
 
 getGreenPathLength(Player,Board,Length):-
     ToVisit = [[7,1],[9,2],[11,3],[13,4],[15,5]],
     allied(Player,green,Allied),
-    getPathLength(Board,ToVisit,[],Allied,green,1,Length).
+    getPathLength(Board,ToVisit,[],Allied,green,0,Length).
     
 
-buildLevel(_,Level1,Level1,[],Visited,Visited,_,_).
-buildLevel(Board,Level1,ReturnLevel,ToVisit,Visited,NewVisited,Allied,CheckingColor):-
+buildLevel(_,Level1,Level1,[],Visited,Visited,_,_,_).
+buildLevel(Board,Level1,ReturnLevel,ToVisit,Visited,NewVisited,Allied,CheckingColor,Depth):-
     [H|T] = ToVisit,
     [Row,Diagonal | _] = H,
     (
@@ -134,20 +134,21 @@ buildLevel(Board,Level1,ReturnLevel,ToVisit,Visited,NewVisited,Allied,CheckingCo
                     append(Neighbours,T,Aux),
                     append([H],Visited,Aux2),
                     remove_dups(Aux,NoDupes),
-                    buildLevel(Board,Level1,ReturnLevel,NoDupes,Aux2,NewVisited,Allied,CheckingColor)
+                    buildLevel(Board,Level1,ReturnLevel,NoDupes,Aux2,NewVisited,Allied,CheckingColor,Depth)
                 );
                 (
                     (Color == empty),
+                    Depth > 0 ,
                     append([H],Visited,Aux2),
                     remove_dups(T,NoDupes),
-                    buildLevel(Board,[H|Level1],ReturnLevel,NoDupes,Aux2,NewVisited,Allied,CheckingColor)
+                    buildLevel(Board,[H|Level1],ReturnLevel,NoDupes,Aux2,NewVisited,Allied,CheckingColor,Depth)
                 ); true
             )
         ); 
         (
             append([H],Visited,Aux2),
             remove_dups(T,NoDupes),
-            buildLevel(Board,Level1,ReturnLevel,NoDupes,Aux2,NewVisited,Allied,CheckingColor)
+            buildLevel(Board,Level1,ReturnLevel,NoDupes,Aux2,NewVisited,Allied,CheckingColor,Depth)
         )
     ).
 
@@ -216,7 +217,7 @@ remove_list([X|Tail], L2, [X|Result]):- remove_list(Tail, L2, Result).
 
 getPathLength(_,[],_,_,_,_,-1).
 getPathLength(Board,ToVisit,LastVisited,Allied,CheckingColor,CurrentDepth,Depth):-
-    buildLevel(Board,[],ReturnLevel,ToVisit,LastVisited,Visited,Allied,CheckingColor),
+    buildLevel(Board,[],ReturnLevel,ToVisit,LastVisited,Visited,Allied,CheckingColor,CurrentDepth),
     getNextPossibleVisited(ReturnLevel, [],ToVisitNext),
     fillFinishLevel(Board,ToVisitNext,Visited,[],NewLevel,CheckingColor,Allied),
     NewDepth is CurrentDepth+1,
@@ -226,6 +227,10 @@ getPathLength(Board,ToVisit,LastVisited,Allied,CheckingColor,CurrentDepth,Depth)
     append(NewToVisitNext,ToVisitNext,Aux),
     remove_list(Aux,NewVisited,NextListOfTiles),
     (
+        (
+            CurrentDepth =:= 0,
+            getPathLength(Board,ToVisit,[],Allied,CheckingColor,1,Depth)
+        );
         (
             \+stopCondition(CheckingColor,FinishedLevel),
             getPathLength(Board,NextListOfTiles,NewVisited,Allied,CheckingColor,NewDepth,Depth)
