@@ -141,14 +141,7 @@ buildLevel(Board,Level1,ReturnLevel,ToVisit,Visited,NewVisited,Allied,CheckingCo
                     append([H],Visited,Aux2),
                     remove_dups(T,NoDupes),
                     buildLevel(Board,[H|Level1],ReturnLevel,NoDupes,Aux2,NewVisited,Allied,CheckingColor)
-                );
-                (
-                    getNeighbours(Row,Diagonal,Neighbours),
-                    append(Neighbours,T,Aux),
-                    append([H],Visited,Aux2),
-                    remove_dups(Aux,NoDupes),
-                    buildLevel(Board,Level1,ReturnLevel,NoDupes,Aux2,NewVisited,Allied,CheckingColor)
-                )
+                ); true
             )
         ); 
         (
@@ -221,6 +214,7 @@ remove_list([], _, []).
 remove_list([X|Tail], L2, Result):- member(X, L2), !, remove_list(Tail, L2, Result). 
 remove_list([X|Tail], L2, [X|Result]):- remove_list(Tail, L2, Result).
 
+getPathLength(_,[],_,_,_,_,-1).
 getPathLength(Board,ToVisit,LastVisited,Allied,CheckingColor,CurrentDepth,Depth):-
     buildLevel(Board,[],ReturnLevel,ToVisit,LastVisited,Visited,Allied,CheckingColor),
     getNextPossibleVisited(ReturnLevel, [],ToVisitNext),
