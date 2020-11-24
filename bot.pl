@@ -117,7 +117,6 @@ getOrangePathLength(Player,Board,Length):-
     allied(Player,orange,Allied),
     getPathLength(Board,ToVisit,[],Allied,orange,0,Length).
 
-% Function used to set up the search for the pieces necessary to make a path between the purple boarders
 getPurplePathLength(Player,Board,Length):-
     ToVisit = [[18,7],[19,8],[20,9],[21,10],[22,11]],
     allied(Player,purple,Allied),
@@ -148,8 +147,8 @@ buildLevel(Board,Level1,ReturnLevel,ToVisit,Visited,NewVisited,Allied,CheckingCo
                     getNeighbours(Row,Diagonal,Neighbours),
                     append(Neighbours,T,Aux),
                     append([H],Visited,Aux2),
-                    remove_dups(Aux,NoDupes),
-                    buildLevel(Board,Level1,ReturnLevel,NoDupes,Aux2,NewVisited,Allied,CheckingColor,Depth)
+                    remove_dups(Aux,NoDupes),                        
+                    buildLevel(Board,[H|Level1],ReturnLevel,NoDupes,Aux2,NewVisited,Allied,CheckingColor,Depth)
                 );
                 (
                     (Color == empty),
@@ -157,7 +156,7 @@ buildLevel(Board,Level1,ReturnLevel,ToVisit,Visited,NewVisited,Allied,CheckingCo
                     append([H],Visited,Aux2),
                     remove_dups(T,NoDupes),
                     buildLevel(Board,[H|Level1],ReturnLevel,NoDupes,Aux2,NewVisited,Allied,CheckingColor,Depth)
-                ); true
+                )
             )
         ); 
         (
@@ -191,7 +190,8 @@ fillFinishLevel(Board,ToVisitNext,Visited,Aux,NewLevel,CheckingColor,Allied):-
             getValue(Board,Row,Diagonal,Color),
             (Color == CheckingColor; Color == Allied), 
             getNeighbours(Row,Diagonal,Neighbours),
-            fillFinishLevel(Board,[Neighbours | ToVisitNext], [H | Visited], [H | Aux], NewLevel,CheckingColor,Allied)
+            append(Neighbours,T, NewToVisit),
+            fillFinishLevel(Board,NewToVisit, [H | Visited], [H | Aux], NewLevel,CheckingColor,Allied)
 
         );
         (
@@ -236,7 +236,7 @@ remove_list([X|Tail], L2, [X|Result]):- remove_list(Tail, L2, Result).
 
 getPathLength(_,[],_,_,_,_,-1).
 getPathLength(Board,ToVisit,LastVisited,Allied,CheckingColor,CurrentDepth,Depth):-
-    buildLevel(Board,[],ReturnLevel,ToVisit,LastVisited,Visited,Allied,CheckingColor,CurrentDepth),
+    buildLevel(Board,[],ReturnLevel,ToVisit,LastVisited,Visited,Allied,CheckingColor,CurrentDepth), 
     getNextPossibleVisited(ReturnLevel, [],ToVisitNext),
     fillFinishLevel(Board,ToVisitNext,Visited,[],NewLevel,CheckingColor,Allied),
     NewDepth is CurrentDepth+1,
@@ -306,3 +306,12 @@ simMoves(GameState,ListOfMoves,Player, BestMove,BestMoveValue, FinalBestMove):-
         simMoves(GameState,T,Player,BestMove,BestMoveValue,FinalBestMove)
     ).
     
+
+
+test:-
+    initial(Board),
+    ToVisit = [[0,0],[1,0],[2,0],[3,0],[4,0]],
+    allied(0,orange,Allied),
+    display_board(Board,0,0),
+    getPathLength(Board,ToVisit,[],Allied,orange,0,Length),
+    write(Length).

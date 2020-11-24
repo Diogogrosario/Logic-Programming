@@ -1,26 +1,26 @@
 :- use_module(library(between)).
 
 initial([
-              [empty,empty],                           %even
-            [empty,empty,empty],                       %odd
-          [empty,empty,empty,empty],                   %even
+              [purple,empty],                           %even
+            [purple,empty,empty],                       %odd
+          [purple,empty,empty,empty],                   %even
+        [purple,green,empty,empty,empty],               %odd
+      [purple,empty,green,empty,empty,empty],           %even
         [empty,empty,empty,empty,empty],               %odd
-      [empty,empty,empty,empty,empty,empty],           %even
-        [empty,empty,empty,empty,empty],               %odd
-      [empty,empty,empty,empty,empty,empty],           %even
+      [empty,empty,green,empty,empty,empty],           %even
     [empty,empty,empty,empty,empty,empty,empty],       %odd
-      [empty,empty,empty,empty,empty,empty],           %even
+      [empty,empty,green,empty,empty,empty],           %even
     [empty,empty,empty,empty,empty,empty,empty],       %odd
-      [empty,empty,empty,empty,empty,empty],           %even
+      [empty,empty,green,empty,empty,empty],           %even
     [empty,empty,empty,empty,empty,empty,empty],
       [empty,empty,empty,empty,empty,empty],
     [empty,empty,empty,empty,empty,empty,empty],
       [empty,empty,empty,empty,empty,empty],
     [empty,empty,empty,empty,empty,empty,empty],
-      [empty,empty,empty,empty,empty,empty],
-        [empty,empty,empty,empty,empty],
-      [empty,empty,empty,empty,empty,empty],
-        [empty,empty,empty,empty,empty],
+      [empty,empty,green,empty,empty,empty],
+        [empty,empty,green,empty,empty],
+      [empty,empty,empty,green,empty,empty],
+        [empty,empty,empty,green,empty],
           [empty,empty,empty,empty],
             [empty,empty,empty],
               [empty,empty]
