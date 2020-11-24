@@ -108,249 +108,47 @@ getNeighbours(Row,Diagonal,Neighbours):-
     NextDiagonal is Diagonal+1,
     Neighbours = [[LastRow,Diagonal],[NextRow,NextDiagonal],[LastLastRow,LastDiagonal],[NextNextRow,NextDiagonal],[LastRow,LastDiagonal],[NextRow,Diagonal]].
     
-% Wrapper function used to parse the results of the function checkLine for the color orange.
-% Initiates the list ToVisit to match the starting point of the color orange.
-% This function adapts to the current player making diferent results if the color is won by both at the same time (the current player wins it)
-checkOrange(Board,PlayerOrange, Player):-
-    ToVisit = [[0,0],[1,0],[2,0],[3,0],[4,0]] ,
-    (
-        (
-            allied(0,orange,Allied0),
-            (
-                (
-                    checkLine(Board,ToVisit,[],Allied0,orange,0), 
-                    Player0Orange is 0
-                );
-                (
-                    (
-                        \+checkLine(Board,ToVisit,[],Allied0,orange,1),
-                        Player1Orange is 1
-                    )
-                );  
-                true
-            )
-        ),
-        (
-            allied(1,orange,Allied1),
-            (
-                (
-                    \+number(Player1Orange),
-                    checkLine(Board,ToVisit,[],Allied1,orange,0),
-                    Player1Orange is 1
-                ); 
-                (
-                    \+number(Player0Orange),
-                    (
-                        \+checkLine(Board,ToVisit,[],Allied1,orange,1),
-                        Player0Orange is 0
-                    )
-                );
-                true
-            )
-        )
-    ),
-    (
-        (
-            number(Player0Orange), number(Player1Orange),
-            PlayerOrange is Player
-        );
-        (
-            number(Player0Orange),
-            PlayerOrange is Player0Orange
-        );
-        (
-            number(Player1Orange),
-            PlayerOrange is Player1Orange
-        ); fail
-    ).
-    
 
-% Wrapper function used to parse the results of the function checkLine for the color green.
-% Initiates the list ToVisit to match the starting point of the color green.
-% This function adapts to the current player making diferent results if the color is won by both at the same time (the current player wins it)
+checkOrange(0,_,_,0,_).
+checkOrange(1,_,_,1,_).
+checkOrange(_,Player,Board,NewOrangeWon,Orange1Length):-
+    getOrangePathLength(Player,Board,Orange1Length),
+    getNewWon(Player,Orange1Length,NewOrangeWon).
 
-checkGreen(Board,PlayerGreen, Player):-
-    ToVisit = [[7,1],[9,2],[11,3],[13,4],[15,5]] ,
-    (
-        (
-            allied(0,green,Allied0),
-            (
-                (
-                    checkLine(Board,ToVisit,[],Allied0,green,0), 
-                    Player0Green is 0
+checkPurple(0,_,_,0,_).
+checkPurple(1,_,_,1,_).
+checkPurple(_,Player,Board,NewPurpleWon,Purple1Length):-
+    getPurplePathLength(Player,Board,Purple1Length),
+    getNewWon(Player,Purple1Length,NewPurpleWon).
 
-                );
-                (
-                    (
-                        \+checkLine(Board,ToVisit,[],Allied0,green,1),
-                        Player1Green is 1
-                    )
-                );  
-                true
-            )
-        ),
-        (
-            allied(1,green,Allied1),
-            (
-                (
-                    \+number(Player1Green),
-                    checkLine(Board,ToVisit,[],Allied1,green,0),
-                    Player1Green is 1
-                ); 
-                (
-                    \+number(Player0Green),
-                    (
-                        \+checkLine(Board,ToVisit,[],Allied1,green,1),
-                        Player0Green is 0
-                    )
-                );
-                true
-            )
-        )
-    ),
-    (
-        (
-            number(Player0Green), number(Player1Green),
-            PlayerGreen is Player
-        );
-        (
-            number(Player0Green),
-            PlayerGreen is Player0Green
-        );
-        (
-            number(Player1Green),
-            PlayerGreen is Player1Green
-        ); fail
-    ).
+checkGreen(0,_,_,0,_).
+checkGreen(1,_,_,1,_).
+checkGreen(_,Player,Board,NewGreenWon,Green1Length):-
+    getGreenPathLength(Player,Board,Green1Length),
+    getNewWon(Player,Green1Length,NewGreenWon).
 
+getNewWon(Player,-1,NewPlayer):-
+    NewPlayer is mod(Player+1,2).
+getNewWon(Player,0,Player).
+getNewWon(_,_,-1).
 
-% Wrapper function used to parse the results of the function checkLine for the color purple.
-% Initiates the list ToVisit to match the starting point of the color purple.
-% This function adapts to the current player making diferent results if the color is won by both at the same time (the current player wins it)
-
-checkPurple(Board,PlayerPurple, Player):-
-    ToVisit = [[18,7],[19,8],[20,9],[21,10],[22,11]],
-    (
-        (
-            allied(0,purple,Allied0),
-            (
-                (
-                    checkLine(Board,ToVisit,[],Allied0,purple,0), 
-                    Player0Purple is 0
-                );
-                (
-                    (
-                        \+checkLine(Board,ToVisit,[],Allied0,purple,1),
-                        Player1Purple is 1
-                    )
-                );  
-                true
-            )
-        ),
-        (
-            allied(1,purple,Allied1),
-            (
-                (
-                    \+number(Player1Purple),
-                    checkLine(Board,ToVisit,[],Allied1,purple,0),
-                    Player1Purple is 1
-                ); 
-                (
-                    \+number(Player0Purple),
-                    (
-                        \+checkLine(Board,ToVisit,[],Allied1,purple,1),
-                        Player0Purple is 0
-                    )
-                );
-                true
-            )
-        )
-    ),
-    (
-        (
-            number(Player0Purple), number(Player1Purple),
-            PlayerPurple is Player
-        );
-        (
-            number(Player0Purple),
-            PlayerPurple is Player0Purple
-        );
-        (
-            number(Player1Purple),
-            PlayerPurple is Player1Purple
-        ); fail
-    ).
-
-
-
-% This function "follows" a line made of the color that it receives and his allied color (depends on the player).
-% The function starts with the list ToVisit which indicates the starting side of the hexagon.
-% The list is then iterated and for each value its neighbours are added to the list to be checked after. 
-% If its possible to find a path between both sides of the hexagon the captured color is updated to match the player who captured it.
-
-checkLine(_,[],_,_,_,_):- fail.
-checkLine(Board,ToVisit,Visited,Allied,CheckingColor, Fencing):-
-    [H|T] = ToVisit,
-    (
-        
-        (
-            \+member(H,Visited),
-            [Row,Diagonal | _ ] = H,
-            valid_line(Row),
-            diagonal_index(Row,D1),
-            diagonal_index_end(Row,D2),
-            valid_diagonal(Diagonal,D1,D2),
-            getValue(Board,Row,Diagonal,Color),
-            (Color == CheckingColor; Color == Allied; (Fencing =:= 1, Color == empty)),
-            (
-                at_border(CheckingColor, Row, Diagonal);
-                (
-                    getNeighbours(Row, Diagonal, Neighbours),
-                    append(Neighbours,T,NewToVisit),
-                    !,checkLine(Board,NewToVisit,[H | Visited],Allied,CheckingColor,Fencing)
-                )
-            )
-        );
-        (
-            !,checkLine(Board,T,[H | Visited],Allied,CheckingColor,Fencing)
-        )
-    ).
-
-
-% Function that joins all the results obtained from the checkColors functions and makes a list out of them to be used in the gameState.
-updateColorsWon(GameState,NewColorsWon, Player):-
+updateColorsWon(GameState,NewColorsWon, Player, Length1, Length2):-
     [Board, ColorsWon | _ ] = GameState,
     [OrangeWon, PurpleWon, GreenWon | _ ] = ColorsWon,
-    (
-        (
-            (OrangeWon =:= -1),
-            checkOrange(Board,PlayerOrange, Player)
-        );
-        (
-            PlayerOrange = OrangeWon
-        )
-    ),
-    (
-        (
-            (PurpleWon =:= -1),
-            checkPurple(Board, PlayerPurple, Player)
-        );
-        (
-            PlayerPurple = PurpleWon
-        )
-    ),
-    (
-        (
-            (GreenWon =:= -1),
-            checkGreen(Board,PlayerGreen,Player)
-        );
-        (
-            PlayerGreen = GreenWon
-        )
-    ),
-    NewColorsWon = [PlayerOrange, PlayerPurple, PlayerGreen].
+    NewP is mod(Player+1,2),
 
-% When a piece is place this function updates the remaining pieces of that color.
+    checkOrange(OrangeWon,Player,Board,NewOrangeWon,Orange1Length),
+    checkPurple(PurpleWon,Player,Board,NewPurpleWon,Purple1Length),
+    checkGreen(GreenWon,Player,Board,NewGreenWon,Green1Length),
+    Length1 = [Orange1Length,Purple1Length,Green1Length],
+
+    checkOrange(NewOrangeWon,NewP,Board,FinalOrangeWon,Orange2Length),
+    checkPurple(NewPurpleWon,NewP,Board,FinalPurpleWon,Purple2Length),
+    checkGreen(NewGreenWon,NewP,Board,FinalGreenWon,Green2Length),
+    Length2 = [Orange2Length,Purple2Length,Green2Length],
+
+    NewColorsWon = [FinalOrangeWon,FinalPurpleWon,FinalGreenWon].
+
 updateNPieces(Move,NPieces,NewNPieces):-
     [_,_,Color|_] = Move,
     [OrangePieces, PurplePieces, GreenPieces | _] = NPieces,
@@ -381,7 +179,7 @@ game_loop(GameState,Player,Winner,1,_,_):-  %PvP  (1)
     updateNPieces(Move,NPieces,NewNPieces),
     move(GameState, Move, NewGameState),
     [NewBoard | _] = NewGameState,
-    updateColorsWon([NewBoard, ColorsWon], NewColorsWon, Player),
+    updateColorsWon([NewBoard, ColorsWon],NewColorsWon, Player, _, _),
     !,
     game_over([NewBoard,NewColorsWon,NewNPieces],Winner),
     update_player(Player, NewPlayer),
@@ -412,7 +210,7 @@ game_loop(GameState,Player,Winner,2,Level,_):- %PvAI  (2)
     updateNPieces(Move,NPieces,NewNPieces),
     move(GameState, Move, NewGameState),    
     [NewBoard | _] = NewGameState,
-    updateColorsWon([NewBoard, ColorsWon], NewColorsWon, Player),
+    updateColorsWon([NewBoard, ColorsWon], NewColorsWon, Player, _, _),
     !,
     game_over([NewBoard,NewColorsWon,NewNPieces],Winner),
     update_player(Player, NewPlayer),
@@ -441,7 +239,7 @@ game_loop(GameState,Player,Winner,3,Level,_):- %AIvP  (3)
     updateNPieces(Move,NPieces,NewNPieces),
     move(GameState, Move, NewGameState),    
     [NewBoard | _] = NewGameState,
-    updateColorsWon([NewBoard, ColorsWon], NewColorsWon, Player),
+    updateColorsWon([NewBoard, ColorsWon], NewColorsWon, Player, _, _),
     !,
     game_over([NewBoard,NewColorsWon,NewNPieces],Winner),
     update_player(Player, NewPlayer),
@@ -470,7 +268,7 @@ game_loop(GameState,Player,Winner,4,Level1,Level2):- %AIvAI  (4)
     updateNPieces(Move,NPieces,NewNPieces),
     move(GameState, Move, NewGameState),    
     [NewBoard | _] = NewGameState,
-    updateColorsWon([NewBoard, ColorsWon], NewColorsWon, Player),
+    updateColorsWon([NewBoard, ColorsWon], NewColorsWon, Player, _, _),
     !,
     game_over([NewBoard,NewColorsWon,NewNPieces],Winner),
     update_player(Player, NewPlayer),

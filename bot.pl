@@ -1,11 +1,8 @@
-% Calculates the value of the board
-value(GameState, Player, Value):-
-    [Board, ColorsWon | _] = GameState,
+value(GameState, Player,Length1,Length2, Value):-
+    [_, ColorsWon | _] = GameState,
     captured_color_value(Player, ColorsWon, ColorValue),
-    getPathValue(Player,ColorsWon,Board,PathValue),
-    NewP is mod(Player+1,2),
-    getPathValue(NewP,ColorsWon,Board,Player2PathValue),
-    Value is ColorValue + PathValue - Player2PathValue.
+    getPathValue(ColorsWon,Length1,Length2,PathValue),
+    Value is ColorValue + PathValue.
 
 % Calculates the value of the captured colors (+400 for player colors, 0 for neutral and -400 for opponent's color)
 captured_color_value(Player, ColorsWon,ColorValue):-
@@ -88,28 +85,22 @@ valid_moves(GameState, _Player ,FinalListOfMoves):-
     remove_dups(AuxFinalListOfMoves, NoDuplicateListOfMoves),
     delete(NoDuplicateListOfMoves,[], FinalListOfMoves).
 
-% Function used to get the value of the player's path between the sides of the hexagon with the same colors.
-% It's used as a part of the funtion to evaluate the best possible move the bot can do since its called when testing all valid moves.
-% The function gets the number of pieces necessary to finish building the path by using an algorithm similar to a breadth-first search algorithm
-% with a max depth of 9. The value is obtained by putting 9 minus the pieces necessary to finish the path to the power of three.
-getPathValue(Player,ColorsWon,Board,PathValue):-
+getValue(0,_,0).
+getValue(1,_,0).
+getValue(_,Length,Value):-
+    Value is (9-Length)*(9-Length)*(9-Length).
+
+getPathValue(ColorsWon,PlayerLength,OpponentLength,PathValue):-
     [Orange,Purple,Green] = ColorsWon,
-    (
-        (Orange \== -1, Length is 9) ; 
-        getOrangePathLength(Player,Board,Length)
-    ),
-    (
-        (Purple \==  -1, Length1 is 9);
-        getPurplePathLength(Player,Board,Length1)
-    ),
-    (
-        (Green \==  -1, Length2 is 9); 
-        getGreenPathLength(Player,Board,Length2)
-    ),
-    AuxValue is (9-Length)*(9-Length)*(9-Length),
-    AuxValue1 is (9-Length1)*(9-Length1)*(9-Length1),
-    AuxValue2 is (9-Length2)*(9-Length2)*(9-Length2),
-    PathValue is AuxValue + AuxValue1 + AuxValue2.
+    [Length,Length1,Length2] = PlayerLength,
+    [OppLength,OppLength1,OppLength2] = OpponentLength,
+    getValue(Orange,Length,PlayerValue),
+    getValue(Purple,Length1,PlayerValue1),
+    getValue(Green,Length2,PlayerValue2),
+    getValue(Orange,OppLength,OppValue),
+    getValue(Purple,OppLength1,OppValue1),
+    getValue(Green,OppLength2,OppValue2),
+    PathValue is PlayerValue + PlayerValue1 + PlayerValue2 - OppValue - OppValue1 - OppValue2.
 
 % Function used to set up the search for the pieces necessary to make a path between the orange boarders
 getOrangePathLength(Player,Board,Length):-
@@ -292,8 +283,8 @@ simMoves(GameState,ListOfMoves,Player, BestMove,BestMoveValue, FinalBestMove):-
     updateNPieces(Move,NPieces,_),
     move(GameState, Move, NewGameState),    
     [NewBoard | _] = NewGameState,
-    updateColorsWon([NewBoard, ColorsWon], NewColorsWon, Player),
-    value([NewBoard,NewColorsWon], Player, Value),
+    updateColorsWon([NewBoard, ColorsWon],NewColorsWon, Player, Length1, Length2),
+    value([NewBoard,NewColorsWon], Player,Length1,Length2, Value),
     (
         (
             Value > BestMoveValue,
