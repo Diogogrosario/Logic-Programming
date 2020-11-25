@@ -85,21 +85,21 @@ valid_moves(GameState, _Player ,FinalListOfMoves):-
     remove_dups(AuxFinalListOfMoves, NoDuplicateListOfMoves),
     delete(NoDuplicateListOfMoves,[], FinalListOfMoves).
 
-getValue(0,_,0).
-getValue(1,_,0).
-getValue(_,Length,Value):-
+get_Value(0,_,0).
+get_Value(1,_,0).
+get_Value(_,Length,Value):-
     Value is (9-Length)*(9-Length)*(9-Length).
 
 getPathValue(ColorsWon,PlayerLength,OpponentLength,PathValue):-
     [Orange,Purple,Green] = ColorsWon,
     [Length,Length1,Length2] = PlayerLength,
     [OppLength,OppLength1,OppLength2] = OpponentLength,
-    getValue(Orange,Length,PlayerValue),
-    getValue(Purple,Length1,PlayerValue1),
-    getValue(Green,Length2,PlayerValue2),
-    getValue(Orange,OppLength,OppValue),
-    getValue(Purple,OppLength1,OppValue1),
-    getValue(Green,OppLength2,OppValue2),
+    get_Value(Orange,Length,PlayerValue),
+    get_Value(Purple,Length1,PlayerValue1),
+    get_Value(Green,Length2,PlayerValue2),
+    get_Value(Orange,OppLength,OppValue),
+    get_Value(Purple,OppLength1,OppValue1),
+    get_Value(Green,OppLength2,OppValue2),
     PathValue is PlayerValue + PlayerValue1 + PlayerValue2 - OppValue - OppValue1 - OppValue2.
 
 % Function used to set up the search for the pieces necessary to make a path between the orange boarders
@@ -127,10 +127,7 @@ buildLevel(Board,Level1,ReturnLevel,ToVisit,Visited,NewVisited,Allied,CheckingCo
     (
         (
             \+member(H,Visited),
-            valid_line(Row),
-            diagonal_index(Row,D1),
-            diagonal_index_end(Row,D2),
-            valid_diagonal(Diagonal,D1,D2),
+            validMove(Row,Diagonal),
             getValue(Board,Row,Diagonal,Color),
             (
                 (
@@ -174,10 +171,7 @@ fillFinishLevel(Board,ToVisitNext,Visited,Aux,NewLevel,CheckingColor,Allied):-
     (
         (
             \+member(H,Visited),
-            valid_line(Row),
-            diagonal_index(Row,D1),
-            diagonal_index_end(Row,D2),
-            valid_diagonal(Diagonal,D1,D2),
+            validMove(Row,Diagonal),
             getValue(Board,Row,Diagonal,Color),
             (Color == CheckingColor; Color == Allied), 
             getNeighbours(Row,Diagonal,Neighbours),

@@ -96,10 +96,7 @@ valid_diagonal(Diagonal, D1, D2):-
     
 % Returns the neighbours of a piece.
 getNeighbours(Row,Diagonal,Neighbours):-
-    valid_line(Row),
-    diagonal_index(Row,DiagonalStart), 
-    diagonal_index_end(Row,DiagonalEnd), 
-    valid_diagonal(Diagonal,DiagonalStart,DiagonalEnd),
+    validMove(Row,Diagonal),
     LastRow is Row-1,
     LastLastRow is Row-2,
     NextRow is Row+1,
@@ -131,6 +128,12 @@ getNewWon(Player,-1,NewPlayer):-
     NewPlayer is mod(Player+1,2).
 getNewWon(Player,0,Player).
 getNewWon(_,_,-1).
+
+validMove(Row,Diagonal):-
+    valid_line(Row),
+    diagonal_index(Row,D1),
+    diagonal_index_end(Row,D2),
+    valid_diagonal(Diagonal,D1,D2).
 
 updateColorsWon(GameState,NewColorsWon, Player, Length1, Length2):-
     [Board, ColorsWon | _ ] = GameState,
