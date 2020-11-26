@@ -61,7 +61,7 @@ valid_color(Color,NPieces):-
 get_line(Line):-
     repeat,
         write('Insert move line (0-22): '),
-        read(Line),
+        catch(read(Line),_,true),
         valid_line(Line),!.
 
 get_diagonal(Diagonal, Line):-
@@ -69,7 +69,7 @@ get_diagonal(Diagonal, Line):-
     diagonal_index_end(Line, D2),
     repeat,
         write('Insert move diagonal ('), write(D1), write('-'), write(D2), write(') :'),
-        read(Diagonal),
+        catch(read(Diagonal),_,true),
         valid_diagonal(Diagonal,D1,D2),!.
   
 
@@ -78,8 +78,10 @@ parse_color('P',purple).
 parse_color('G',green).  
 get_color(Color,NPieces):-
     repeat,
-        write('Insert move color (\'O\',\'P\',\'G\'): '),
-        read(Aux),
+        write('Insert move color (O, P, G): '),
+        skip_line,
+        catch(get_char(Aux),_,true),
+        skip_line,
         valid_color(Aux,NPieces),
         parse_color(Aux,Color).
         !.
