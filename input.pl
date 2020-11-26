@@ -1,5 +1,6 @@
 :- use_module(library(lists)).
 
+% Facts with the first diagonal index of each row.
 diagonal_index(0,0).
 diagonal_index(1,0).
 diagonal_index(2,0).
@@ -24,6 +25,7 @@ diagonal_index(20,9).
 diagonal_index(21,10).
 diagonal_index(22,11).
 
+% Facts with the last diagonal index of a row.
 diagonal_index_end(0,1).
 diagonal_index_end(1,2).
 diagonal_index_end(2,3).
@@ -48,7 +50,7 @@ diagonal_index_end(20,12).
 diagonal_index_end(21,12).
 diagonal_index_end(22,12).
 
-
+% Used to validate the input color.
 valid_color(Color,NPieces):-
     [Orange, Purple, Green | _ ] = NPieces,
     atom(Color),
@@ -58,12 +60,14 @@ valid_color(Color,NPieces):-
       (Color == 'P', (Purple > 0; (write('No Purple Pieces Left.'), nl,fail) ))
     ).
 
+% Used to read a line.
 get_line(Line):-
     repeat,
         write('Insert move line (0-22): '),
         catch(read(Line),_,true),
         valid_line(Line),!.
 
+% Used to read a diagonal.
 get_diagonal(Diagonal, Line):-
     diagonal_index(Line, D1),
     diagonal_index_end(Line, D2),
@@ -73,9 +77,12 @@ get_diagonal(Diagonal, Line):-
         valid_diagonal(Diagonal,D1,D2),!.
   
 
+% Used to turn the input char into a color.
 parse_color('O',orange).  
 parse_color('P',purple).  
-parse_color('G',green).  
+parse_color('G',green).
+
+% Used to read a color.
 get_color(Color,NPieces):-
     repeat,
         write('Insert move color (O, P, G): '),
@@ -86,6 +93,7 @@ get_color(Color,NPieces):-
         parse_color(Aux,Color).
         !.
 
+% Used to check if a tile is empty
 is_empty(Line,Diagonal,Board):-
     nth0(Line,Board,Row),
     diagonal_index(Line,X),
@@ -101,6 +109,7 @@ is_empty(Line,Diagonal,Board):-
       )
     ).
 
+% Function used to get a move by calling the functions to get the line, diagonal and color. After that checks if the color is empty.
 get_move([Line,Diagonal,Color],Board, NPieces):-
     repeat,
         get_line(Line), 
