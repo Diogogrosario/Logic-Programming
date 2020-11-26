@@ -72,25 +72,17 @@ get_diagonal(Diagonal, Line):-
         read(Diagonal),
         valid_diagonal(Diagonal,D1,D2),!.
   
+
+parse_color('O',orange).  
+parse_color('P',purple).  
+parse_color('G',green).  
 get_color(Color,NPieces):-
     repeat,
         write('Insert move color (\'O\',\'P\',\'G\'): '),
         read(Aux),
         valid_color(Aux,NPieces),
-        (
-          (
-            Aux == 'O',
-            Color = orange
-          );
-          (
-            Aux == 'P',
-            Color = purple
-          );
-          (
-            Aux == 'G',
-            Color = green
-          )
-        ),!.
+        parse_color(Aux,Color).
+        !.
 
 is_empty(Line,Diagonal,Board):-
     nth0(Line,Board,Row),

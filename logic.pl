@@ -76,6 +76,7 @@ move(GameState, Move, NewGameState):-
 
 count_occurrences(List, X, Count) :- aggregate_all(count, member(X, List), Count).
 
+% If a player has alreay captured two colors he is the winner.
 game_over(GameState, Winner):-
     [ _ , ColorsWon | _ ] = GameState, 
     count_occurrences(ColorsWon,0,CountOfZero),
@@ -83,15 +84,17 @@ game_over(GameState, Winner):-
     (CountOfZero < 2 ; Winner is 0),
     (CountOfOne < 2 ; Winner is 1).
 
+% Checks if the line is valid 
 valid_line(Line):-
     number(Line),
     between(0,22,Line).
   
+% Checks if the diagonal is valid 
 valid_diagonal(Diagonal, D1, D2):-
     number(Diagonal),
     between(D1,D2,Diagonal).
     
-
+% Returns the neighbours of a piece.
 getNeighbours(Row,Diagonal,Neighbours):-
     valid_line(Row),
     diagonal_index(Row,DiagonalStart), 
@@ -105,7 +108,9 @@ getNeighbours(Row,Diagonal,Neighbours):-
     NextDiagonal is Diagonal+1,
     Neighbours = [[LastRow,Diagonal],[NextRow,NextDiagonal],[LastLastRow,LastDiagonal],[NextNextRow,NextDiagonal],[LastRow,LastDiagonal],[NextRow,Diagonal]].
     
-
+% Wrapper function used to parse the results of the function checkLine for the color orange.
+% Initiates the list ToVisit to match the starting point of the color orange.
+% This function adapts to the current player making diferent results if the color is won by both at the same time (the current player wins it)
 checkOrange(Board,PlayerOrange, Player):-
     ToVisit = [[0,0],[1,0],[2,0],[3,0],[4,0]] ,
     (
@@ -159,6 +164,10 @@ checkOrange(Board,PlayerOrange, Player):-
         ); fail
     ).
     
+
+% Wrapper function used to parse the results of the function checkLine for the color green.
+% Initiates the list ToVisit to match the starting point of the color green.
+% This function adapts to the current player making diferent results if the color is won by both at the same time (the current player wins it)
 
 checkGreen(Board,PlayerGreen, Player):-
     ToVisit = [[7,1],[9,2],[11,3],[13,4],[15,5]] ,
@@ -214,6 +223,11 @@ checkGreen(Board,PlayerGreen, Player):-
         ); fail
     ).
 
+
+% Wrapper function used to parse the results of the function checkLine for the color purple.
+% Initiates the list ToVisit to match the starting point of the color purple.
+% This function adapts to the current player making diferent results if the color is won by both at the same time (the current player wins it)
+
 checkPurple(Board,PlayerPurple, Player):-
     ToVisit = [[18,7],[19,8],[20,9],[21,10],[22,11]],
     (
@@ -268,8 +282,13 @@ checkPurple(Board,PlayerPurple, Player):-
     ).
 
 
-checkLine(_,[],_,_,_,_):- fail.
 
+% This function "follows" a line made of the color that it receives and his allied color (depends on the player).
+% The function starts with the list ToVisit which indicates the starting side of the hexagon.
+% The list is then iterated and for each value its neighbours are added to the list to be checked after. 
+% If its possible to find a path between both sides of the hexagon the captured color is updated to match the player who captured it.
+
+checkLine(_,[],_,_,_,_):- fail.
 checkLine(Board,ToVisit,Visited,Allied,CheckingColor, Fencing):-
     [H|T] = ToVisit,
     (
@@ -298,7 +317,7 @@ checkLine(Board,ToVisit,Visited,Allied,CheckingColor, Fencing):-
     ).
 
 
-
+% Function that joins all the results obtained from the checkColors functions and makes a list out of them to be used in the gameState.
 updateColorsWon(GameState,NewColorsWon, Player):-
     [Board, ColorsWon | _ ] = GameState,
     [OrangeWon, PurpleWon, GreenWon | _ ] = ColorsWon,
@@ -331,6 +350,7 @@ updateColorsWon(GameState,NewColorsWon, Player):-
     ),
     NewColorsWon = [PlayerOrange, PlayerPurple, PlayerGreen].
 
+% When a piece is place this function updates the remaining pieces of that color.
 updateNPieces(Move,NPieces,NewNPieces):-
     [_,_,Color|_] = Move,
     [OrangePieces, PurplePieces, GreenPieces | _] = NPieces,

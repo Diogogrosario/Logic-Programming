@@ -44,6 +44,7 @@ even_row(18).
 even_row(20).
 even_row(22).
 
+% Necessary line starters because the lines of the hexagon do not start the same way
 start_value(0,'    ___/ ').
 start_value(1,'org ___/ ').
 start_value(2,'    ___/ ').
@@ -68,6 +69,8 @@ start_value(20,'   \\___/ ').
 start_value(21,'prp\\___/ ').
 start_value(22,'   \\___/ ').
 
+
+% Necessary line starters because the lines of the hexagon do not end the same way
 end_value(0,'___2                     ').
 end_value(1,'___3   prp           ').
 end_value(2,'___4             ').
