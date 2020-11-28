@@ -1,5 +1,5 @@
-:- use_module(library(between)).
 
+% Initial board
 initial([
               [empty,empty],                           %even
             [empty,empty,empty],                       %odd
@@ -26,11 +26,13 @@ initial([
               [empty,empty]
 ]).
 
+% Associates each color to a letter to be printed on the hexagon.
 cell_val(orange, 'O').
 cell_val(green, 'G').
 cell_val(purple, 'P').
 cell_val(empty, ' ').
 
+% Checks if the row is even
 even_row(0).
 even_row(2).
 even_row(4).
@@ -95,15 +97,20 @@ end_value(20,'___/             ').
 end_value(21,'___/ org             ').
 end_value(22,'___/                     ').
 
-max_length_odd(7).    
+% Max length an odd row can have.
+max_length_odd(7).  
+
+% Max length an even row can have.  
 max_length_even(6).
 
+% Writes N spaces.
 writeNspaces(0).
 writeNspaces(X):-
     write(' '),
     NX is X-1,
     writeNspaces(NX).
 
+% Displays each tile of the board with it's respective color
 display_start_value(0,Nrow):-
     start_value(Nrow,X),
     write(X).
@@ -120,7 +127,7 @@ display_piece(H,Nrow,NPiece) :-
     write(' \\'),
     display_piece(T,Nrow,1).
 
-
+% Closes the top of the hexagon
 close_hex_top:-
     writeNspaces(31), write('Column'),writeNspaces(31),write('Line'),nl,
     writeNspaces(28),
@@ -128,12 +135,14 @@ close_hex_top:-
     writeNspaces(4),
     write('___1'), nl.
 
+% Closes the bottom of the hexagon.
 close_hex_bot:-
     writeNspaces(27),
     write('\\___/'),
     writeNspaces(3),
     write('\\___/'), nl.
 
+% Displays N spaces to align the board
 write_row_spaces(Nrow,L):-
     even_row(Nrow),!,
     max_length_even(X),
@@ -145,6 +154,7 @@ write_row_spaces(_,L):-
     N is (X - L) * 4,
     writeNspaces(N).
 
+% Displays a row
 display_line(H,NRow) :-
     length(H,L),
     write_row_spaces(NRow,L),
@@ -154,6 +164,7 @@ display_line(H,NRow) :-
     write('   '), write(NRow), nl.
     
 
+% Displays board using recursion to be able to print each row correctly
 display_board([],_,_).
 display_board(GameState,Player,NRow) :-
     [H | T] = GameState,
@@ -161,22 +172,25 @@ display_board(GameState,Player,NRow) :-
     NewRow is NRow+1,
     display_board(T,Player,NewRow).
 
+% Displays current player
 display_player(Player):-
     P is Player+1,
     write('Current Player: ') , write(P), nl.
 
+% Displays remaining pieces
 display_remaining_pieces(NPieces) :-
     [Orange,Purple,Green|_] = NPieces,
     write('Current Orange Pieces Left: '), write(Orange), nl,
     write('Current Purple Pieces Left: '), write(Purple), nl,
     write('Current Green Pieces Left: '), write(Green), nl.
 
+% Displays color's alliances
 display_alliances:-
     write('Player 1 alliances: To connect Orange: Orange-Green, to connect Green: Green-Purple, to connect Purple: Purple-Orange'), nl,
     write('Player 2 alliances: To connect Orange: Orange-Purple, to connect Green: Green-Orange, to connect Purple: Purple-Green'), nl.
 
 
-
+% Displays the player that won each color
 write_orange_player(-1):-write('Orange :'), nl.
 write_orange_player(Orange):-
     PO is Orange+1,
@@ -197,6 +211,7 @@ display_colors([Orange, Purple, Green | _]):-
     write_purple_player(Purple),
     write_green_player(Green).
 
+% Displays the game state.
 display_game(GameState,Player):-
     [Board , Colors, NPieces | _] = GameState,
     close_hex_top,
@@ -207,6 +222,7 @@ display_game(GameState,Player):-
     display_colors(Colors),
     display_alliances.
 
+% Displays game name.
 display_name:-
   write('       $$$$$$\\  $$\\       $$\\       $$$$$$\\  $$$$$$\\  $$\\   $$\\  $$$$$$\\  $$$$$$$$\\  $$$$$$\\ '), nl,
   write('      $$  __$$\\ $$ |      $$ |      \\_$$  _|$$  __$$\\ $$$\\  $$ |$$  __$$\\ $$  _____|$$  __$$\\ '), nl,
@@ -218,6 +234,7 @@ display_name:-
   write('      \\__|  \\__|\\________|\\________|\\______|\\__|  \\__|\\__|  \\__| \\______/ \\________| \\______/ '), nl, nl,
   write('   ----------------------------------------------------------------------------------------------'), nl.
 
+% Display game modes menu.
 display_mode(Mode):-
   repeat,
     write('         1) Player VS Player'), nl,
@@ -228,7 +245,7 @@ display_mode(Mode):-
     between(1,4,AuxMode), !,
   Mode = AuxMode.
 
-
+% Display game's winner.
 display_winner(Winner):-
   WinningPlayer is Winner+1,
   write('The winner is player '), write(WinningPlayer), write('!').

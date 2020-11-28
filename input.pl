@@ -1,5 +1,3 @@
-:- use_module(library(lists)).
-
 % Used to turn the input char into a color.
 parse_color('O',orange).  
 parse_color('P',purple).  
@@ -55,24 +53,25 @@ diagonal_index_end(20,12).
 diagonal_index_end(21,12).
 diagonal_index_end(22,12).
 
+
+% Functions used to write the number of pieces in play left of each color
 writePiecesLeft('O',NPieces):-
   NPieces =< 0, 
   write('No Orange Pieces Left.'), nl, fail.
 writePiecesLeft('O', NPieces):-
   NPieces>0.
-
 writePiecesLeft('P',NPieces):-
   NPieces =< 0, 
   write('No Purple Pieces Left.'), nl, fail.
 writePiecesLeft('P', NPieces):-
   NPieces>0.
-
 writePiecesLeft('G',NPieces):-
   NPieces =< 0, 
   write('No Green Pieces Left.'), nl, fail.
 writePiecesLeft('G', NPieces):-
   NPieces>0.
 
+% Used to copy the correct number of pieces left on the function 'valid_color'
 getColor(Orange,_,_,'O',Orange).
 getColor(_,Purple,_,'P',Purple).
 getColor(_,_,Green,'G',Green).
@@ -110,6 +109,7 @@ get_color(Color,NPieces):-
         parse_color(Aux,Color),
         !.
 
+% Error message in case the tile the playert wants to put the piece on is not empty
 errorMessage(empty).
 errorMessage(_):-
   write('Invalid move, tile is not empty.'), nl,

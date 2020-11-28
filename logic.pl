@@ -1,14 +1,7 @@
-:- include('display.pl').
-:- include('input.pl').
-:- include('bot.pl').
-
-:- use_module(library(random)).
-:- use_module(library(aggregate)).
-:- use_module(library(system)).
-
+%starting player
 player(0).
 
-
+% Allied colors according to the player.
 allied(0,orange,green).
 allied(1,orange,purple).
 
@@ -18,6 +11,7 @@ allied(1,green,orange).
 allied(0,purple,orange).
 allied(1,purple,green).
 
+% Colores boarder coordenates.
 at_border(orange, 18, 12).
 at_border(orange, 19, 12).
 at_border(orange, 20, 12).
@@ -36,11 +30,11 @@ at_border(green, 11, 9).
 at_border(green, 13, 10).
 at_border(green, 15, 11).
 
-
+% Updates the current player.
 update_player(Player, NewPlayer):-
     NewPlayer is mod(Player+1,2).
 
-
+% Gets the value of a tile (it's color or empty).
 getValue(Board,RowNumber,Diagonal,Color):-
     nth0(RowNumber,Board,Row),
     diagonal_index(RowNumber,DiagonalStart),
@@ -49,12 +43,14 @@ getValue(Board,RowNumber,Diagonal,Color):-
 
 
 % gotten from https://stackoverflow.com/questions/8519203/prolog-replace-an-element-in-a-list-at-a-specified-index/8544713
+% replaces a value in a list
 replace_val([_|T], 0, X, [X|T]).
 replace_val([H|T], I, X, [H|R]):- 
   I > 0, 
   I1 is I-1, 
   replace_val(T, I1, X, R).
 
+% Gets a desired row of the board.
 getRow([Row|T],0,[NewRow|T],[InitialRow|V]):-
     [Diagonal|R] = V,
     diagonal_index(InitialRow,X),
@@ -67,11 +63,13 @@ getRow([H|T],RowNumber,[H|NewBoard],Move):-
     NewRowNumber is RowNumber-1,
     getRow(T,NewRowNumber,NewBoard,Move).
 
+% Used to make the player's move.
 move([Board | T ], Move, NewGameState):-
     [RowNumber|_] = Move,
     getRow(Board,RowNumber,NewBoard,Move),
     NewGameState = [NewBoard|T].
 
+% Counts how many occurences of X are in a list (used to get the number of colors won by each player).
 count_occurrences(List, X, Count) :- aggregate_all(count, member(X, List), Count).
 
 % If a player has alreay captured two colors he is the winner.
@@ -124,6 +122,7 @@ checkGreen(_,Player,Board,NewGreenWon,Green1Length):-
     getGreenPathLength(Player,Board,Green1Length),
     getNewWon(Player,Green1Length,NewGreenWon).
 
+% Updates the player that won a color
 getNewWon(Player,-1,NewPlayer):-
     NewPlayer is mod(Player+1,2).
 getNewWon(Player,0,Player).
@@ -151,6 +150,7 @@ updateColorsWon([Board, [OrangeWon, PurpleWon, GreenWon | _ ] | _ ],NewColorsWon
 
     NewColorsWon = [FinalOrangeWon,FinalPurpleWon,FinalGreenWon].
 
+% Records the use of a piece (removes from the count).
 usePiece(orange,[Orange,Purple,Green | _] ,[NewOrange,Purple,Green]):-
     NewOrange is Orange-1.
 usePiece(purple,[Orange,Purple,Green | _] ,[Orange,NewPurple,Green]):-
@@ -162,12 +162,15 @@ usePiece(green,[Orange,Purple,Green | _] ,[Orange,Purple,NewGreen]):-
 updateNPieces([_,_,Color|_], NPieces ,NewNPieces):-
     usePiece(Color,NPieces, NewNPieces).
 
+% Checks if a winner was found
 checkForWinner(_,_,Winner,_,_,_):-
     number(Winner).
 
 checkForWinner([NewBoard,NewColorsWon,NewNPieces],NewPlayer,Winner,GameMode,Bot1Diff,Bot2Diff):-
     game_loop([NewBoard,NewColorsWon,NewNPieces],NewPlayer,Winner,GameMode,Bot1Diff,Bot2Diff).
 
+
+% Used to decide how the next move is from (Player or AI) according to game mode and AI difficulty.
 getNextMove(GameState,Player,_,_,Move,2):-
     [Board | T] = GameState,
     [_ , NPieces | _] = T,
@@ -192,6 +195,9 @@ getNextMove(GameState,Player,_,Level2,Move,4):-
 getNextMove(GameState,Player,Level1,_,Move,4):-
     Player =:= 0,
     choose_move(GameState,Player,Level1,Move).
+
+
+% Game's main loops (Game mode is next to each loop)
 
 game_loop(GameState,Player,Winner,1,_,_):-  %PvP  (1)
     [Board | T] = GameState,
@@ -250,6 +256,7 @@ game_loop(GameState,Player,Winner,4,Level1,Level2):- %AIvAI  (4)
     checkForWinner([NewBoard,NewColorsWon,NewNPieces],NewPlayer,Winner,4,Level1,Level2).
 
 
+% Gets the bot difficulty according to the game mode. 
 get_bot_dificulty(1,_, _):- !.
 get_bot_dificulty(4, Difficulty1, Difficulty2):- 
     !,
@@ -281,6 +288,7 @@ get_bot_dificulty(_, Difficulty1, _):-
         between(1,2,AuxDifficulty1), !,
     Difficulty1 = AuxDifficulty1.
 
+% Starting predicate that initializes every variable needed to start.
 play :-
     prompt(_,''),
     display_name,
@@ -288,6 +296,6 @@ play :-
     get_bot_dificulty(Mode, Difficulty1, Difficulty2),
     player(Player),
     initial(Board),
-    game_loop([Board,[-1,-1,-1],[0,42,42]], Player, Winner, Mode, Difficulty1, Difficulty2),
+    game_loop([Board,[-1,-1,-1],[42,42,42]], Player, Winner, Mode, Difficulty1, Difficulty2),
     display_winner(Winner).
 

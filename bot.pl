@@ -1,4 +1,3 @@
-
 % Calculates the value of the board
 value([_, ColorsWon | _], Player,Length1,Length2, Value):-
     captured_color_value(Player, ColorsWon, ColorValue),
@@ -17,19 +16,23 @@ captured_color_value(Player, ColorsWon,ColorValue):-
 % If it is, one possible move is added for every color of piece if there are still any remaining.
 iterateRow([],_,_,_,NewListOfMoves,NewListOfMoves).
 iterateRow([Value | T ],CurrentRow,CurrentDiagonal,NPieces,ListOfMoves,FinalListOfMoves):-
-    getMove(Value,AuxOrange,AuxGreen,AuxPurple,CurrentRow,CurrentDiagonal,NPieces),
+    get_possible_valid_move(Value,AuxOrange,AuxGreen,AuxPurple,CurrentRow,CurrentDiagonal,NPieces),
     append([AuxPurple],[AuxOrange],AuxList),
     append(AuxList,[AuxGreen],NewAuxList),
     append(ListOfMoves,NewAuxList,NewListOfMoves),
     NewDiagonal is CurrentDiagonal +1,
     iterateRow(T,CurrentRow,NewDiagonal,NPieces,NewListOfMoves,FinalListOfMoves).
 
-getMove(empty,AuxOrange,AuxPurple,AuxGreen,CurrentRow,CurrentDiagonal,[Orange,Purple,Green]):-
+% Used to check if a move with every color is valid (it is if there are any left).
+% This function is called as an auxiliar function of 'iterateRow'.
+get_possible_valid_move(empty,AuxOrange,AuxPurple,AuxGreen,CurrentRow,CurrentDiagonal,[Orange,Purple,Green]):-
     addOrangeMove(CurrentRow,CurrentDiagonal,Orange,AuxOrange),
     addPurpleMove(CurrentRow,CurrentDiagonal,Purple,AuxPurple),
     addGreenMove(CurrentRow,CurrentDiagonal,Green,AuxGreen).
-getMove(_,[],[],[],_,_,_).
+get_possible_valid_move(_,[],[],[],_,_,_).
 
+
+% Functions used to verify if there are any pieces left with the desired color.
 hasPiece(_,0,[],_,_).
 hasPiece(orange,_,AuxOrange,CurrentRow,CurrentDiagonal):-
     AuxOrange = [CurrentRow,CurrentDiagonal,orange].
@@ -65,6 +68,8 @@ valid_moves([Board, _ , NPieces], _Player ,FinalListOfMoves):-
     remove_dups(AuxFinalListOfMoves, NoDuplicateListOfMoves),
     delete(NoDuplicateListOfMoves,[], FinalListOfMoves).
 
+
+% Used to calculate the value of a board according to the pieces needed to complete a line.
 get_Value(0,_,0).
 get_Value(1,_,0).
 get_Value(_,Length,Value):-
@@ -72,8 +77,8 @@ get_Value(_,Length,Value):-
 
 % Function used to get the value of the player's path between the sides of the hexagon with the same colors.
 % It's used as a part of the funtion to evaluate the best possible move the bot can do since its called when testing all valid moves.
-% The function gets the number of pieces necessary to finish building the path by using an algorithm similar to a breadth-first search algorithm
-% with a max depth of 9. The value is obtained by putting 9 minus the pieces necessary to finish the path to the power of three.
+% The function gets the number of pieces necessary to finish building the path by using an algorithm similar to a breadth-first search algorithm.~
+% The value is obtained by putting 9 minus the pieces necessary to finish the path to the power of three.
 getPathValue([Orange,Purple,Green], [Length,Length1,Length2], [OppLength,OppLength1,OppLength2],PathValue):-
     get_Value(Orange,Length,PlayerValue),
     get_Value(Purple,Length1,PlayerValue1),
@@ -100,7 +105,7 @@ getGreenPathLength(Player,Board,Length):-
     allied(Player,green,Allied),
     getPathLength(Board,ToVisit,[],Allied,green,0,Length).
     
-
+% Constructs a level of tiles that share the same distance from a path created using a color.
 buildLevel(_,Level1,Level1,[],Visited,Visited,_,_,_).
 buildLevel(Board,Level1,ReturnLevel,[H|T],Visited,NewVisited,Allied,CheckingColor,Depth):-
     [Row,Diagonal | _] = H,
@@ -141,7 +146,9 @@ getNextPossibleVisited([[Row,Diagonal | _ ] | T] , Aux,ToVisitNext):-
     getNeighbours(Row,Diagonal,Neighbours),
     append(Neighbours,Aux,NewToVisit),
     getNextPossibleVisited(T,NewToVisit, ToVisitNext).
-    
+
+% Iterates the contructed level on the function 'buildLevel' and checks if there is any color or allies color next to the tiles saved there
+% and adds those to the level with the same length.
 fillFinishLevel(_,[],_,NewLevel,NewLevel,_,_).
 fillFinishLevel(Board,[H | T],Visited,Aux,NewLevel,CheckingColor,Allied):-
     [Row,Diagonal | _] = H,
@@ -196,6 +203,13 @@ remove_list([], _, []).
 remove_list([X|Tail], L2, Result):- member(X, L2), !, remove_list(Tail, L2, Result). 
 remove_list([X|Tail], L2, [X|Result]):- remove_list(Tail, L2, Result).
 
+
+% Used to get the max length of a path that has to be created using a color and it's allied color to reach the 
+% opposing side of the hexagon with the same color as the starting one.
+% This function receives a starting 'ToVisit' list that corresponds to the side of a hexagon with a color.
+% The 'ToVisit' list is iterated with recursion, visiting a different tile every time and getting its neighbours.
+% If a piece checks the stop condiotion (is at the other side of the hexagon with the same color) the function stops
+% and the value of the depth is considered the length needed to finish the path.
 getPathLength(_,[],_,_,_,_,-1).
 getPathLength(Board,ToVisit,LastVisited,Allied,CheckingColor,CurrentDepth,Depth):-
     buildLevel(Board,[],ReturnLevel,ToVisit,LastVisited,Visited,Allied,CheckingColor,CurrentDepth), 
@@ -255,6 +269,8 @@ simMoves(GameState,[Move | T], Player, BestMove,BestMoveValue, FinalBestMove):-
     canImprove(Value,BestMoveValue,GameState,T,Player,Move,BestMove,FinalBestMove).
 
     
+% Used to check if the value of the current testing board is better than the previous best one.
+% The moves with the same value are saved in a list and a random among those is used.
 canImprove(Value,BestMoveValue,GameState,T,Player,Move,_,FinalBestMove):-
     Value > BestMoveValue,
     simMoves(GameState,T,Player,[Move],Value,FinalBestMove).
