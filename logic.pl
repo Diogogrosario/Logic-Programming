@@ -168,6 +168,31 @@ checkForWinner(_,_,Winner,_,_,_):-
 checkForWinner([NewBoard,NewColorsWon,NewNPieces],NewPlayer,Winner,GameMode,Bot1Diff,Bot2Diff):-
     game_loop([NewBoard,NewColorsWon,NewNPieces],NewPlayer,Winner,GameMode,Bot1Diff,Bot2Diff).
 
+getNextMove(GameState,Player,_,_,Move,2):-
+    [Board | T] = GameState,
+    [_ , NPieces | _] = T,
+    Player =:= 0,
+    get_move(Move,Board,NPieces).
+getNextMove(GameState,Player,_,Level1,Move,2):-
+    Player =:= 1,
+    choose_move(GameState,Player,Level1,Move).
+
+getNextMove(GameState,Player,_,_,Move,3):-
+    [Board | T] = GameState,
+    [_ , NPieces | _] = T,
+    Player =:= 1,
+    get_move(Move,Board,NPieces).
+getNextMove(GameState,Player,Level1,_,Move,3):-
+    Player =:= 0,
+    choose_move(GameState,Player,Level1,Move).
+
+getNextMove(GameState,Player,_,Level2,Move,4):-
+    Player =:= 1,
+    choose_move(GameState,Player,Level2,Move).
+getNextMove(GameState,Player,Level1,_,Move,4):-
+    Player =:= 0,
+    choose_move(GameState,Player,Level1,Move).
+
 game_loop(GameState,Player,Winner,1,_,_):-  %PvP  (1)
     [Board | T] = GameState,
     [ColorsWon , NPieces | _] = T,
@@ -181,22 +206,12 @@ game_loop(GameState,Player,Winner,1,_,_):-  %PvP  (1)
     game_over([NewBoard,NewColorsWon,NewNPieces],Winner),
     update_player(Player, NewPlayer),
     checkForWinner([NewBoard,NewColorsWon,NewNPieces],NewPlayer,Winner,1,_,_).
-
-
       
 game_loop(GameState,Player,Winner,2,Level,_):- %PvAI  (2)
-    [Board | T] = GameState,
+    [_ | T] = GameState,
     [ColorsWon , NPieces | _] = T,
     display_game(GameState,Player),
-    (
-        (
-            Player =:= 0,
-            get_move(Move,Board, NPieces)
-        );
-        (
-            choose_move(GameState,Player,Level,Move)
-        )
-    ),
+    getNextMove(GameState,Player,_,Level,Move,2),
     updateNPieces(Move,NPieces,NewNPieces),
     move(GameState, Move, NewGameState),    
     [NewBoard | _] = NewGameState,
@@ -207,18 +222,10 @@ game_loop(GameState,Player,Winner,2,Level,_):- %PvAI  (2)
     checkForWinner([NewBoard,NewColorsWon,NewNPieces],NewPlayer,Winner,2,Level,_).
 
 game_loop(GameState,Player,Winner,3,Level,_):- %AIvP  (3)
-    [Board | T] = GameState,
+    [_ | T] = GameState,
     [ColorsWon , NPieces | _] = T,
     display_game(GameState,Player),
-    (
-        (
-            Player =:= 1,
-            get_move(Move,Board, NPieces)
-        );
-        (
-            choose_move(GameState,Player,Level,Move)
-        )
-    ),
+    getNextMove(GameState,Player,Level,_,Move,3),
     updateNPieces(Move,NPieces,NewNPieces),
     move(GameState, Move, NewGameState),    
     [NewBoard | _] = NewGameState,
@@ -232,15 +239,7 @@ game_loop(GameState,Player,Winner,4,Level1,Level2):- %AIvAI  (4)
     [_ | T] = GameState,
     [ColorsWon , NPieces | _] = T,
     display_game(GameState,Player),
-    (
-        (
-            Player =:= 1,
-            choose_move(GameState,Player,Level2,Move)
-        );
-        (
-            choose_move(GameState,Player,Level1,Move)
-        )
-    ),
+    getNextMove(GameState,Player,Level1,Level2,Move),
     updateNPieces(Move,NPieces,NewNPieces),
     move(GameState, Move, NewGameState),    
     [NewBoard | _] = NewGameState,
