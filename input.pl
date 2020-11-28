@@ -90,7 +90,7 @@ get_color(Color,NPieces):-
         catch(get_char(Aux),_,true),
         skip_line,
         valid_color(Aux,NPieces),
-        parse_color(Aux,Color).
+        parse_color(Aux,Color),
         !.
 
 % Used to check if a tile is empty

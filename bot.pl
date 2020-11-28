@@ -1,5 +1,6 @@
-value(GameState, Player,Length1,Length2, Value):-
-    [_, ColorsWon | _] = GameState,
+
+% Calculates the value of the board
+value([_, ColorsWon | _], Player,Length1,Length2, Value):-
     captured_color_value(Player, ColorsWon, ColorValue),
     getPathValue(ColorsWon,Length1,Length2,PathValue),
     Value is ColorValue + PathValue.
@@ -15,72 +16,51 @@ captured_color_value(Player, ColorsWon,ColorValue):-
 % Used to create the list of valid moves. When iterating the board it checks if the tile is empty. 
 % If it is, one possible move is added for every color of piece if there are still any remaining.
 iterateRow([],_,_,_,NewListOfMoves,NewListOfMoves).
-iterateRow(Row,CurrentRow,CurrentDiagonal,NPieces,ListOfMoves,FinalListOfMoves):-
-    [Value | T ] = Row,
-    [Orange, Purple, Green] = NPieces,
-    (
-        (
-            Value \== empty,
-            AuxOrange = [],
-            AuxPurple = [],
-            AuxGreen = []
-        );
-        (
-            addOrangeMove(CurrentRow,CurrentDiagonal,Orange,AuxOrange),
-            addPurpleMove(CurrentRow,CurrentDiagonal,Purple,AuxPurple),
-            addGreenMove(CurrentRow,CurrentDiagonal,Green,AuxGreen)
-        )
-    ),
+iterateRow([Value | T ],CurrentRow,CurrentDiagonal,NPieces,ListOfMoves,FinalListOfMoves):-
+    getMove(Value,AuxOrange,AuxGreen,AuxPurple,CurrentRow,CurrentDiagonal,NPieces),
     append([AuxPurple],[AuxOrange],AuxList),
     append(AuxList,[AuxGreen],NewAuxList),
     append(ListOfMoves,NewAuxList,NewListOfMoves),
     NewDiagonal is CurrentDiagonal +1,
     iterateRow(T,CurrentRow,NewDiagonal,NPieces,NewListOfMoves,FinalListOfMoves).
 
+getMove(empty,AuxOrange,AuxPurple,AuxGreen,CurrentRow,CurrentDiagonal,[Orange,Purple,Green]):-
+    addOrangeMove(CurrentRow,CurrentDiagonal,Orange,AuxOrange),
+    addPurpleMove(CurrentRow,CurrentDiagonal,Purple,AuxPurple),
+    addGreenMove(CurrentRow,CurrentDiagonal,Green,AuxGreen).
+getMove(_,[],[],[],_,_,_).
+
+hasPiece(_,0,[],_,_).
+hasPiece(orange,_,AuxOrange,CurrentRow,CurrentDiagonal):-
+    AuxOrange = [CurrentRow,CurrentDiagonal,orange].
+hasPiece(purple,_,AuxPurple,CurrentRow,CurrentDiagonal):-
+    AuxPurple = [CurrentRow,CurrentDiagonal,purple].
+hasPiece(green,_,AuxGreen,CurrentRow,CurrentDiagonal):- 
+    AuxGreen = [CurrentRow,CurrentDiagonal,green].
+
 % Auxiliar function for the iterate Row that verifies if there are any Orange pieces remaining and if there is it return a possible orange move
 addOrangeMove(CurrentRow,CurrentDiagonal,Orange,AuxOrange):-
-    (
-        Orange > 0,
-        AuxOrange = [CurrentRow,CurrentDiagonal,orange]
-    );
-    (
-    AuxOrange = []
-    ).
+    hasPiece(orange,Orange,AuxOrange,CurrentRow,CurrentDiagonal).
 
 % Auxiliar function for the iterate Row that verifies if there are any Purple pieces remaining and if there is it return a possible purple move
 addGreenMove(CurrentRow,CurrentDiagonal,Green,AuxGreen):-
-    (
-        Green > 0,
-        AuxGreen = [CurrentRow,CurrentDiagonal,green]
-    );
-    (
-    AuxGreen = []
-    ). 
+    hasPiece(green,Green,AuxGreen,CurrentRow,CurrentDiagonal).
+
 % Auxiliar function for the iterate Row that verifies if there are any Green pieces remaining and if there is it return a possible green move
 addPurpleMove(CurrentRow,CurrentDiagonal,Purple,AuxPurple):-
-    (
-        Purple > 0,
-        AuxPurple = [CurrentRow,CurrentDiagonal,purple]
-    );
-    (
-    AuxPurple = []
-    ). 
-
+    hasPiece(purple,Purple,AuxPurple,CurrentRow,CurrentDiagonal).
 
 % Used as a auxiliar funtion of the valid_moves function. Used to iterate the board to find every separate row that is used in the function
 % iterateRow to build the list of possible moves.
-
 iterateBoard([],_,_,FinalListOfMoves,FinalListOfMoves).
-iterateBoard(Board,NPieces,CurrentRow,ListOfMoves,FinalListOfMoves):-    
-    [Row | T ] = Board,
+iterateBoard([Row | T ],NPieces,CurrentRow,ListOfMoves,FinalListOfMoves):- 
     diagonal_index(CurrentRow,Diagonal),
     iterateRow(Row,CurrentRow,Diagonal,NPieces,ListOfMoves,RowListOfMoves),
     NewRow is CurrentRow+1,
     iterateBoard(T,NPieces,NewRow,RowListOfMoves,FinalListOfMoves).
 
 % Used to obtain the list of possible moves.
-valid_moves(GameState, _Player ,FinalListOfMoves):-
-    [Board, _ , NPieces] = GameState,
+valid_moves([Board, _ , NPieces], _Player ,FinalListOfMoves):-
     iterateBoard(Board,NPieces,0,_ , AuxFinalListOfMoves),
     remove_dups(AuxFinalListOfMoves, NoDuplicateListOfMoves),
     delete(NoDuplicateListOfMoves,[], FinalListOfMoves).
@@ -90,10 +70,11 @@ get_Value(1,_,0).
 get_Value(_,Length,Value):-
     Value is (9-Length)*(9-Length)*(9-Length).
 
-getPathValue(ColorsWon,PlayerLength,OpponentLength,PathValue):-
-    [Orange,Purple,Green] = ColorsWon,
-    [Length,Length1,Length2] = PlayerLength,
-    [OppLength,OppLength1,OppLength2] = OpponentLength,
+% Function used to get the value of the player's path between the sides of the hexagon with the same colors.
+% It's used as a part of the funtion to evaluate the best possible move the bot can do since its called when testing all valid moves.
+% The function gets the number of pieces necessary to finish building the path by using an algorithm similar to a breadth-first search algorithm
+% with a max depth of 9. The value is obtained by putting 9 minus the pieces necessary to finish the path to the power of three.
+getPathValue([Orange,Purple,Green], [Length,Length1,Length2], [OppLength,OppLength1,OppLength2],PathValue):-
     get_Value(Orange,Length,PlayerValue),
     get_Value(Purple,Length1,PlayerValue1),
     get_Value(Green,Length2,PlayerValue2),
@@ -121,8 +102,7 @@ getGreenPathLength(Player,Board,Length):-
     
 
 buildLevel(_,Level1,Level1,[],Visited,Visited,_,_,_).
-buildLevel(Board,Level1,ReturnLevel,ToVisit,Visited,NewVisited,Allied,CheckingColor,Depth):-
-    [H|T] = ToVisit,
+buildLevel(Board,Level1,ReturnLevel,[H|T],Visited,NewVisited,Allied,CheckingColor,Depth):-
     [Row,Diagonal | _] = H,
     (
         (
@@ -157,16 +137,13 @@ buildLevel(Board,Level1,ReturnLevel,ToVisit,Visited,NewVisited,Allied,CheckingCo
 % Functions used when calculating the path length. 
 % Gets the neighbors of the pieces inside the list ReturnLevel for the next iteration of the function
 getNextPossibleVisited([], ToVisitNext,ToVisitNext).
-getNextPossibleVisited(ReturnLevel, Aux,ToVisitNext):-
-    [H|T] = ReturnLevel,
-    [Row,Diagonal | _ ] = H,
+getNextPossibleVisited([[Row,Diagonal | _ ] | T] , Aux,ToVisitNext):-
     getNeighbours(Row,Diagonal,Neighbours),
     append(Neighbours,Aux,NewToVisit),
     getNextPossibleVisited(T,NewToVisit, ToVisitNext).
     
 fillFinishLevel(_,[],_,NewLevel,NewLevel,_,_).
-fillFinishLevel(Board,ToVisitNext,Visited,Aux,NewLevel,CheckingColor,Allied):-
-    [H | T] = ToVisitNext,
+fillFinishLevel(Board,[H | T],Visited,Aux,NewLevel,CheckingColor,Allied):-
     [Row,Diagonal | _] = H,
     (
         (
@@ -224,7 +201,6 @@ getPathLength(Board,ToVisit,LastVisited,Allied,CheckingColor,CurrentDepth,Depth)
     buildLevel(Board,[],ReturnLevel,ToVisit,LastVisited,Visited,Allied,CheckingColor,CurrentDepth), 
     getNextPossibleVisited(ReturnLevel, [],ToVisitNext),
     fillFinishLevel(Board,ToVisitNext,Visited,[],NewLevel,CheckingColor,Allied),
-    NewDepth is CurrentDepth+1,
     append(ReturnLevel,NewLevel,FinishedLevel),
     append(Visited,NewLevel,NewVisited),
     getNextPossibleVisited(NewLevel,[],NewToVisitNext),
@@ -233,21 +209,20 @@ getPathLength(Board,ToVisit,LastVisited,Allied,CheckingColor,CurrentDepth,Depth)
     (
         (
             \+stopCondition(CheckingColor,FinishedLevel),
-            (
-                (
-                    CurrentDepth > 0,
-                    getPathLength(Board,NextListOfTiles,NewVisited,Allied,CheckingColor,NewDepth,Depth)
-                );
-                (
-                    CurrentDepth =:= 0,
-                    getPathLength(Board,ToVisit,[],Allied,CheckingColor,1,Depth)
-                )
-            )
+            getNextPathLength(Board,NextListOfTiles,ToVisit,NewVisited,Allied,CheckingColor,Depth,CurrentDepth)
         );
         (
             !,Depth is CurrentDepth
         )
     ).
+
+getNextPathLength(Board,_,ToVisit,_,Allied,CheckingColor,Depth,0):-
+    getPathLength(Board,ToVisit,[],Allied,CheckingColor,1,Depth).
+
+getNextPathLength(Board,NextListOfTiles,_,NewVisited,Allied,CheckingColor,Depth,CurrentDepth):-
+    CurrentDepth > 0,
+    NewDepth is CurrentDepth+1,
+    getPathLength(Board,NextListOfTiles,NewVisited,Allied,CheckingColor,NewDepth,Depth).
 
 % Used to get a random move for the bot in the random dificulty.
 choose_move(GameState,Player,1,Move):- 
@@ -271,32 +246,21 @@ choose_move(GameState,Player,2,Move):-
 % Used to create a game state with simulated moves obtained from the function vali_moves.
 % The new game state is then evaluated and the best game state is used to make a move for the bot.
 simMoves(_,[],_, BestMove,_, BestMove).
-simMoves(GameState,ListOfMoves,Player, BestMove,BestMoveValue, FinalBestMove):-
+simMoves(GameState,[Move | T], Player, BestMove,BestMoveValue, FinalBestMove):-
     [_, ColorsWon, NPieces] = GameState,
-    [Move | T] = ListOfMoves,
     updateNPieces(Move,NPieces,_),
-    move(GameState, Move, NewGameState),    
-    [NewBoard | _] = NewGameState,
+    move(GameState, Move, [NewBoard | _]),  
     updateColorsWon([NewBoard, ColorsWon],NewColorsWon, Player, Length1, Length2),
     value([NewBoard,NewColorsWon], Player,Length1,Length2, Value),
-    (
-        (
-            Value > BestMoveValue,
-            simMoves(GameState,T,Player,[Move],Value,FinalBestMove)
-        ); 
-        (
-            Value =:= BestMoveValue,
-            simMoves(GameState,T,Player,[Move | BestMove],BestMoveValue,FinalBestMove)
-        ); 
-        simMoves(GameState,T,Player,BestMove,BestMoveValue,FinalBestMove)
-    ).
+    canImprove(Value,BestMoveValue,GameState,T,Player,Move,BestMove,FinalBestMove).
+
     
+canImprove(Value,BestMoveValue,GameState,T,Player,Move,_,FinalBestMove):-
+    Value > BestMoveValue,
+    simMoves(GameState,T,Player,[Move],Value,FinalBestMove).
 
+canImprove(Value,Value,GameState,T,Player,Move,BestMove,FinalBestMove):-
+    simMoves(GameState,T,Player,[Move | BestMove],Value,FinalBestMove).
 
-test:-
-    initial(Board),
-    ToVisit = [[0,0],[1,0],[2,0],[3,0],[4,0]],
-    allied(0,orange,Allied),
-    display_board(Board,0,0),
-    getPathLength(Board,ToVisit,[],Allied,orange,0,Length),
-    write(Length).
+canImprove(_,BestMoveValue,GameState,T,Player,_,BestMove,FinalBestMove):-
+    simMoves(GameState,T,Player,BestMove,BestMoveValue,FinalBestMove).
