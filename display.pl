@@ -37,7 +37,7 @@ even_row(4).
 even_row(6).
 even_row(8).
 even_row(10).
-even_row(2).
+even_row(12).
 even_row(14).
 even_row(16).
 even_row(18).
@@ -102,27 +102,19 @@ writeNspaces(0).
 writeNspaces(X):-
     write(' '),
     NX is X-1,
-    (
-      (
-        NX<0,
-        writeNspaces(0)
-      );
-      (
-        writeNspaces(NX)
-      )
-    ).
+    writeNspaces(NX).
+
+display_start_value(0,Nrow):-
+    start_value(Nrow,X),
+    write(X).
+
+display_start_value(_,_):-
+    write('___/ ').
 
 display_piece([],_,_).
 display_piece(H,Nrow,NPiece) :-
     [V | T] = H,
-    (
-      (
-        (NPiece =:= 0),
-        start_value(Nrow,X),
-        write(X)
-      );
-      write('___/ ')
-    ),
+    display_start_value(NPiece,Nrow),
     cell_val(V,Piece),
     write(Piece),
     write(' \\'),
@@ -142,23 +134,20 @@ close_hex_bot:-
     writeNspaces(3),
     write('\\___/'), nl.
 
+write_row_spaces(Nrow,L):-
+    even_row(Nrow),!,
+    max_length_even(X),
+    N is (X - L) * 4,
+    writeNspaces(4+N).
+
+write_row_spaces(_,L):-
+    max_length_odd(X),
+    N is (X - L) * 4,
+    writeNspaces(N).
 
 display_line(H,NRow) :-
-
     length(H,L),
-    (
-      (
-        even_row(NRow),
-        max_length_even(X),
-        N is (X - L) * 4,
-        writeNspaces(4+N)
-      );
-      (
-        max_length_odd(X),
-        N is (X - L) * 4,
-        writeNspaces(N)
-      )
-    ),
+    write_row_spaces(NRow,L),
     display_piece(H,NRow,0), 
     end_value(NRow,Line),
     write(Line),
@@ -186,31 +175,27 @@ display_alliances:-
     write('Player 1 alliances: To connect Orange: Orange-Green, to connect Green: Green-Purple, to connect Purple: Purple-Orange'), nl,
     write('Player 2 alliances: To connect Orange: Orange-Purple, to connect Green: Green-Orange, to connect Purple: Purple-Green'), nl.
 
+
+
+write_orange_player(-1):-write('Orange :'), nl.
+write_orange_player(Orange):-
+    PO is Orange+1,
+    write('Orange : Player '), write(PO), nl.
+
+write_purple_player(-1):-write('Purple :'), nl.
+write_purple_player(Purple):-
+    PP is Purple+1,
+    write('Purple : Player '), write(PP), nl.
+
+write_green_player(-1):-write('Green :'), nl.
+write_green_player(Green):-
+    PG is Green+1,
+    write('Green : Player '), write(PG), nl.
+
 display_colors([Orange, Purple, Green | _]):-
-    (
-      (
-        Orange =\= -1,
-        PO is Orange+1,
-        write('Orange : Player '), write(PO), nl
-      ); 
-      write('Orange :'), nl
-    ),
-    (
-      (
-        Purple =\= -1,
-        PP is Purple+1,
-        write('Purple : Player '), write(PP), nl
-      ); 
-      write('Purple :'), nl
-    ),
-    (
-      (
-        Green =\= -1,
-        PG is Green+1,
-        write('Green : Player '), write(PG), nl
-      ); 
-      write('Green :'), nl
-    ).
+    write_orange_player(Orange),
+    write_purple_player(Purple),
+    write_green_player(Green).
 
 display_game(GameState,Player):-
     [Board , Colors, NPieces | _] = GameState,
