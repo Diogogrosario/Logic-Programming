@@ -224,7 +224,7 @@ display_mode(Mode):-
     write('         2) Player VS AI'), nl,
     write('         3) AI VS Player'), nl,
     write('         4) AI VS AI'), nl,
-    read(AuxMode), number(AuxMode),
+    catch(read(AuxMode),_,true), number(AuxMode),
     between(1,4,AuxMode), !,
   Mode = AuxMode.
 
