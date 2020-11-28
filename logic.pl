@@ -323,6 +323,6 @@ play :-
     get_bot_dificulty(Mode, Difficulty1, Difficulty2),
     player(Player),
     initial(Board),
-    game_loop([Board,[-1,-1,-1],[42,42,42]], Player, Winner, Mode, Difficulty1, Difficulty2),
+    game_loop([Board,[-1,-1,-1],[0,42,42]], Player, Winner, Mode, Difficulty1, Difficulty2),
     display_winner(Winner).
 
