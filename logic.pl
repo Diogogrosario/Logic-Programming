@@ -55,8 +55,7 @@ replace_val([H|T], I, X, [H|R]):-
   I1 is I-1, 
   replace_val(T, I1, X, R).
 
-getRow([Row|T],0,[NewRow|T],Move):-
-    [InitialRow|V] = Move,
+getRow([Row|T],0,[NewRow|T],[InitialRow|V]):-
     [Diagonal|R] = V,
     diagonal_index(InitialRow,X),
     Replace is Diagonal-X,
@@ -68,8 +67,7 @@ getRow([H|T],RowNumber,[H|NewBoard],Move):-
     NewRowNumber is RowNumber-1,
     getRow(T,NewRowNumber,NewBoard,Move).
 
-move(GameState, Move, NewGameState):-
-    [Board | T ] = GameState,
+move([Board | T ], Move, NewGameState):-
     [RowNumber|_] = Move,
     getRow(Board,RowNumber,NewBoard,Move),
     NewGameState = [NewBoard|T].
@@ -77,8 +75,7 @@ move(GameState, Move, NewGameState):-
 count_occurrences(List, X, Count) :- aggregate_all(count, member(X, List), Count).
 
 % If a player has alreay captured two colors he is the winner.
-game_over(GameState, Winner):-
-    [ _ , ColorsWon | _ ] = GameState, 
+game_over([ _ , ColorsWon | _ ], Winner):-
     count_occurrences(ColorsWon,0,CountOfZero),
     count_occurrences(ColorsWon,1,CountOfOne),
     (CountOfZero < 2 ; Winner is 0),
@@ -103,7 +100,10 @@ getNeighbours(Row,Diagonal,Neighbours):-
     NextNextRow is Row+2,
     LastDiagonal is Diagonal-1,
     NextDiagonal is Diagonal+1,
-    Neighbours = [[LastRow,Diagonal],[NextRow,NextDiagonal],[LastLastRow,LastDiagonal],[NextNextRow,NextDiagonal],[LastRow,LastDiagonal],[NextRow,Diagonal]].
+    Neighbours = [
+                    [LastRow,Diagonal],[NextRow,NextDiagonal],[LastLastRow,LastDiagonal],
+                    [NextNextRow,NextDiagonal],[LastRow,LastDiagonal],[NextRow,Diagonal]
+                ].
     
 
 checkOrange(0,_,_,0,_).
@@ -135,9 +135,8 @@ validMove(Row,Diagonal):-
     diagonal_index_end(Row,D2),
     valid_diagonal(Diagonal,D1,D2).
 
-updateColorsWon(GameState,NewColorsWon, Player, Length1, Length2):-
-    [Board, ColorsWon | _ ] = GameState,
-    [OrangeWon, PurpleWon, GreenWon | _ ] = ColorsWon,
+% Funtion that calls every funtion needed to update the colors the players have won and parses the values.
+updateColorsWon([Board, [OrangeWon, PurpleWon, GreenWon | _ ] | _ ],NewColorsWon, Player, Length1, Length2):-
     NewP is mod(Player+1,2),
 
     checkOrange(OrangeWon,Player,Board,NewOrangeWon,Orange1Length),
@@ -152,27 +151,22 @@ updateColorsWon(GameState,NewColorsWon, Player, Length1, Length2):-
 
     NewColorsWon = [FinalOrangeWon,FinalPurpleWon,FinalGreenWon].
 
-updateNPieces(Move,NPieces,NewNPieces):-
-    [_,_,Color|_] = Move,
-    [OrangePieces, PurplePieces, GreenPieces | _] = NPieces,
-    (
-        (
-            (Color == orange),
-            O is OrangePieces-1,
-            NewNPieces = [O,PurplePieces,GreenPieces]
-        );
-        (
-            (Color == purple),
-            P is PurplePieces-1,
-            NewNPieces = [OrangePieces,P,GreenPieces]
-        );
-        (
-            (Color == green),
-            G is GreenPieces-1,
-            NewNPieces = [OrangePieces,PurplePieces,G]
-        )
-    ).
+usePiece(orange,[Orange,Purple,Green | _] ,[NewOrange,Purple,Green]):-
+    NewOrange is Orange-1.
+usePiece(purple,[Orange,Purple,Green | _] ,[Orange,NewPurple,Green]):-
+    NewPurple is Purple-1.
+usePiece(green,[Orange,Purple,Green | _] ,[Orange,Purple,NewGreen]):-
+    NewGreen is Green-1.
 
+% When a piece is place this function updates the remaining pieces of that color.
+updateNPieces([_,_,Color|_], NPieces ,NewNPieces):-
+    usePiece(Color,NPieces, NewNPieces).
+
+checkForWinner(_,_,Winner,_,_,_):-
+    number(Winner).
+
+checkForWinner([NewBoard,NewColorsWon,NewNPieces],NewPlayer,Winner,GameMode,Bot1Diff,Bot2Diff):-
+    game_loop([NewBoard,NewColorsWon,NewNPieces],NewPlayer,Winner,GameMode,Bot1Diff,Bot2Diff).
 
 game_loop(GameState,Player,Winner,1,_,_):-  %PvP  (1)
     [Board | T] = GameState,
@@ -186,14 +180,7 @@ game_loop(GameState,Player,Winner,1,_,_):-  %PvP  (1)
     !,
     game_over([NewBoard,NewColorsWon,NewNPieces],Winner),
     update_player(Player, NewPlayer),
-    (
-       (
-            number(Winner)  % in case there is a winner already the game loop is finished
-        );
-        (
-            game_loop([NewBoard,NewColorsWon,NewNPieces],NewPlayer,Winner,1,_,_)
-        )
-    ).
+    checkForWinner([NewBoard,NewColorsWon,NewNPieces],NewPlayer,Winner,1,_,_).
 
 
       
@@ -217,14 +204,7 @@ game_loop(GameState,Player,Winner,2,Level,_):- %PvAI  (2)
     !,
     game_over([NewBoard,NewColorsWon,NewNPieces],Winner),
     update_player(Player, NewPlayer),
-    (
-       (
-            number(Winner)  % in case there is a winner already the game loop is finished
-        );
-        (
-            game_loop([NewBoard,NewColorsWon,NewNPieces],NewPlayer,Winner,2,Level,_)
-        )
-    ).
+    checkForWinner([NewBoard,NewColorsWon,NewNPieces],NewPlayer,Winner,2,Level,_).
 
 game_loop(GameState,Player,Winner,3,Level,_):- %AIvP  (3)
     [Board | T] = GameState,
@@ -246,14 +226,7 @@ game_loop(GameState,Player,Winner,3,Level,_):- %AIvP  (3)
     !,
     game_over([NewBoard,NewColorsWon,NewNPieces],Winner),
     update_player(Player, NewPlayer),
-    (
-       (
-            number(Winner)  % in case there is a winner already the game loop is finished
-        );
-        (
-            game_loop([NewBoard,NewColorsWon,NewNPieces],NewPlayer,Winner,3,Level,_)
-        )
-    ).
+    checkForWinner([NewBoard,NewColorsWon,NewNPieces],NewPlayer,Winner,3,Level,_).
 
 game_loop(GameState,Player,Winner,4,Level1,Level2):- %AIvAI  (4)
     [_ | T] = GameState,
@@ -275,14 +248,7 @@ game_loop(GameState,Player,Winner,4,Level1,Level2):- %AIvAI  (4)
     !,
     game_over([NewBoard,NewColorsWon,NewNPieces],Winner),
     update_player(Player, NewPlayer),
-    (
-       (
-            number(Winner)  % in case there is a winner already the game loop is finished
-        );
-        (
-            game_loop([NewBoard,NewColorsWon,NewNPieces],NewPlayer,Winner,4,Level1,Level2)
-        )
-    ).
+    checkForWinner([NewBoard,NewColorsWon,NewNPieces],NewPlayer,Winner,4,Level1,Level2).
 
 
 get_bot_dificulty(1,_, _):- !.
