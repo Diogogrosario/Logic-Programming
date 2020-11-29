@@ -212,11 +212,12 @@ display_colors([Orange, Purple, Green | _]):-
     write_green_player(Green).
 
 % Displays the game state.
-display_game(GameState,Player):-
-    [Board , Colors, NPieces | _] = GameState,
+display_game([Board , Colors, NPieces | _],Player):-
+    nl,
     close_hex_top,
     display_board(Board,Player,0),
     close_hex_bot,
+    nl,
     display_player(Player),
     display_remaining_pieces(NPieces),
     display_colors(Colors),
@@ -231,16 +232,17 @@ display_name:-
   write('      $$  __$$ |$$ |      $$ |        $$ |  $$  __$$ |$$ \\$$$$ |$$ |      $$  __|    \\____$$\\ '), nl,
   write('      $$ |  $$ |$$ |      $$ |        $$ |  $$ |  $$ |$$ |\\$$$ |$$ |  $$\\ $$ |      $$\\   $$ |'), nl,
   write('      $$ |  $$ |$$$$$$$$\\ $$$$$$$$\\ $$$$$$\\ $$ |  $$ |$$ | \\$$ |\\$$$$$$  |$$$$$$$$\\ \\$$$$$$  |'), nl,
-  write('      \\__|  \\__|\\________|\\________|\\______|\\__|  \\__|\\__|  \\__| \\______/ \\________| \\______/ '), nl, nl,
-  write('   ----------------------------------------------------------------------------------------------'), nl,nl.
+  write('      \\__|  \\__|\\________|\\________|\\______|\\__|  \\__|\\__|  \\__| \\______/ \\________| \\______/ '), nl.
 
 % Display game modes menu.
 display_mode(Mode):-
   repeat,
+    nl, write('   ----------------------------------------------------------------------------------------------'), nl, nl,
     write('         1) Player VS Player'), nl,
     write('         2) Player VS AI'), nl,
     write('         3) AI VS Player'), nl,
     write('         4) AI VS AI'), nl,
+    write('         '),
     catch(read(AuxMode),_,true), number(AuxMode),
     between(1,4,AuxMode), !,
   Mode = AuxMode.

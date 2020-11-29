@@ -173,8 +173,10 @@ updateNPieces([_,_,Color|_], NPieces ,NewNPieces):-
     usePiece(Color,NPieces, NewNPieces).
 
 % Checks if a winner was found
-checkForWinner(_,_,Winner,_,_,_):-
-    number(Winner).
+checkForWinner(GameState,Player,Winner,_,_,_):-
+    number(Winner),
+    display_game(GameState,Player), 
+    nl.
 
 checkForWinner([NewBoard,NewColorsWon,NewNPieces],NewPlayer,Winner,GameMode,Bot1Diff,Bot2Diff):-
     game_loop([NewBoard,NewColorsWon,NewNPieces],NewPlayer,Winner,GameMode,Bot1Diff,Bot2Diff).
