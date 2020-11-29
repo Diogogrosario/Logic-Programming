@@ -403,5 +403,8 @@ canImprove(_,BestMoveValue,GameState,T,Player,BotDiff,_,BestMove,FinalBestMove):
 O objetivo deste predicado é simular todos as jogadas disponíveis, avaliando o tabuleiro no final de cada, guardando o maior valor e as maiores jogadas. No final de cada move simulado é chamado canImprove, que verifica se o move avaliado é superior ao melhor move no momento.
 
 ## Conclusões
+Em suma, no final deste projeto consideramos que ficamos mais familiarizados com a linguagem prolog e com programação lógica em geral.  
+Consideramos também que conseguimos criar um programa que se assemelha ao jogo "Alliances" de forma completa e robusta, capaz de ser posteriormente adaptado por interfaces gráficas de forma a criar uma experiência mais completa ao utilizador. 
+Uma forma de melhorar o trabalho seria tentar optimizar a função de avaliação do tabuleiro para se assemelhar a um algoritmo minimax de forma a diminuir o tempo de processamento.
 
 ## Bibliografia
