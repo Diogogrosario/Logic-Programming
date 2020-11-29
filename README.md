@@ -72,6 +72,28 @@ Para além disso display_game é responsável por dar display às cores já ganh
 ![Final Board Representation](./images/endBoard.png) <br/>
 
 ### Menus 
+![Main Menu](./images/mainMenu.png) <br/>
+
+Neste menu o jogador consegue selecionar o modo de jogo pretendido de entre um total de quatro modos de jogo:
+- Jogador contra jogador.
+- Jogador contra inteligência artificial.
+- Inteligência artificial contra jogador.
+- Inteligência artificial contra inteligência artificial.
+
+No modo jogador contra jogador, todas as jogadas têm que ser introduzidas pelos utilizadores, sendo que cada jogador introduz uma jogada à vez, sendo que o jogo é iniciado imediatamente após a seleção deste modo de jogo.
+
+<br/>
+<br/>
+Caso qualquer outro modo de jogo seja selecionado, um menu adicional será mostrado pedindo ao utilizador para escolher o nivel da inteligencia artificial. Existem as seguintes dificuldades: fácil, média e difícil.
+
+![dificulty Menu](./images/dificultyMenu.png) <br/>
+
+Quando um dos jogadores é controlado pela inteligência artificial o jogador não precisa de tomar ação nenhuma para que o computador faça a sua jogada, apenas necessita de fazer as suas proprias jogadas.
+<br/>
+Os niveis de dificuldade causam comportamentos diferentes na forma como estes processam o tabuleiro atual:
+- Fácil: neste nivel não existe processamento nenhum, apenas é escolhido uma jogada válida aleatória.
+- Médio: a inteligência artificial tem um comportamento greedy em que analisa o apenas os seus caminhos não tendo em conta o estado do jogo para o seu adversário.
+- Difícil: igual à dificuldade média, mas nesta dificuldade a inteligência artificial tem em conta o estado do adversário, tentando dificultar-lhe as proximas jogadas.
 
 ### Lista de jogadas válidas
 
