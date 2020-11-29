@@ -1,3 +1,57 @@
+% End game board
+end([
+              [orange,empty],                           %even
+            [empty,empty,green],                       %odd
+          [green,purple,empty,empty],                   %even
+        [empty,purple,empty,empty,empty],               %odd
+      [orange,green,orange,empty,empty,empty],           %even
+        [orange,empty,purple,empty,empty],               %odd
+      [empty,orange,empty,empty,green,empty],           %even
+    [empty,orange,empty,empty,green,empty,empty],       %odd
+      [empty,orange,purple,empty,empty,empty],           %even
+    [empty,orange,orange,orange,empty,empty,empty],       %odd
+      [empty,orange,empty,empty,orange,empty],           %even
+    [empty,orange,orange,empty,empty,empty,empty],
+      [empty,orange,purple,empty,empty,empty],
+    [empty,purple,orange,purple,purple,empty,empty],
+      [orange,orange,orange,purple,orange,empty],
+    [empty,orange,orange,empty,purple,empty,empty],
+      [empty,orange,empty,purple,purple,empty],
+        [orange,purple,empty,orange,empty],
+      [orange,empty,orange,empty,purple,empty],
+        [empty,empty,empty,empty,purple],
+          [empty,green,empty,green],
+            [empty,empty,empty],
+              [empty,empty]
+]).
+
+% Mid game board
+mid([
+              [orange,empty],                           %even
+            [empty,empty,green],                       %odd
+          [green,purple,empty,empty],                   %even
+        [empty,purple,empty,empty,empty],               %odd
+      [empty,green,orange,empty,empty,empty],           %even
+        [empty,empty,purple,empty,empty],               %odd
+      [empty,empty,empty,empty,green,empty],           %even
+    [empty,empty,empty,empty,green,empty,empty],       %odd
+      [empty,empty,purple,empty,empty,empty],           %even
+    [empty,empty,orange,orange,empty,empty,empty],       %odd
+      [empty,empty,empty,empty,orange,empty],           %even
+    [empty,empty,orange,empty,empty,empty,empty],
+      [empty,empty,purple,empty,empty,empty],
+    [empty,purple,empty,empty,purple,empty,empty],
+      [orange,green,purple,empty,orange,empty],
+    [empty,empty,orange,empty,green,empty,empty],
+      [empty,empty,empty,purple,empty,empty],
+        [empty,purple,empty,orange,empty],
+      [empty,empty,orange,empty,empty,empty],
+        [empty,empty,empty,empty,green],
+          [empty,green,empty,green],
+            [empty,empty,empty],
+              [empty,empty]
+]).
+
 
 % Initial board
 initial([
@@ -129,7 +183,7 @@ display_piece(H,Nrow,NPiece) :-
 
 % Closes the top of the hexagon
 close_hex_top:-
-    writeNspaces(31), write('Column'),writeNspaces(31),write('Line'),nl,
+    writeNspaces(31), write('Diagonal'),writeNspaces(29),write('Line'),nl,
     writeNspaces(28),
     write('___0'),
     writeNspaces(4),
