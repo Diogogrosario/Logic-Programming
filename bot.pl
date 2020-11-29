@@ -254,25 +254,34 @@ choose_move(GameState,Player,1,Move):-
     write('Putting piece of color '), write(Color), write(' at row '), write(Row), write(' and diagonal '), write(Diagonal), nl.
 
 % Used to get a move for the bot in the greedy dificulty.
-choose_move(GameState,Player,2,Move):- 
+choose_move(GameState,Player,BotDiff,Move):- 
     valid_moves(GameState,Player, ListOfMoves),
-    simMoves(GameState,ListOfMoves,Player,2,_BestMove,-10000, NewMove),
+    simMoves(GameState,ListOfMoves,Player,BotDiff,_BestMove,-10000, NewMove),
     length(NewMove,Length),
     random(0,Length,RandomMove),
     nth0(RandomMove,NewMove,Move),
     [Row,Diagonal,Color] = Move,
     write('Putting piece of color '), write(Color), write(' at row '), write(Row), write(' and diagonal '), write(Diagonal), nl.
 
+
 % Used to create a game state with simulated moves obtained from the function vali_moves.
 % The new game state is then evaluated and the best game state is used to make a move for the bot.
 simMoves(_,[],_,_, BestMove,_, BestMove).
-simMoves(GameState,[Move | T], Player, BotDiff, BestMove,BestMoveValue, FinalBestMove):-
+simMoves(GameState,[Move | T], Player, 2, BestMove,BestMoveValue, FinalBestMove):-
     [_, ColorsWon, NPieces] = GameState,
     updateNPieces(Move,NPieces,_),
     move(GameState, Move, [NewBoard | _]),  
     updateColorsWon([NewBoard, ColorsWon],NewColorsWon, Player, 1, Length1, Length2),
-    value([NewBoard,NewColorsWon], Player,BotDiff,Length1,Length2, Value),
-    canImprove(Value,BestMoveValue,GameState,T,Player,BotDiff,Move,BestMove,FinalBestMove).
+    value([NewBoard,NewColorsWon], Player,2,Length1,Length2, Value),
+    canImprove(Value,BestMoveValue,GameState,T,Player,2,Move,BestMove,FinalBestMove).
+
+simMoves(GameState,[Move | T], Player, 3, BestMove,BestMoveValue, FinalBestMove):-
+    [_, ColorsWon, NPieces] = GameState,
+    updateNPieces(Move,NPieces,_),
+    move(GameState, Move, [NewBoard | _]),  
+    updateColorsWon([NewBoard, ColorsWon],NewColorsWon, Player,0 , Length1, Length2),
+    value([NewBoard,NewColorsWon], Player,3,Length1,Length2, Value),
+    canImprove(Value,BestMoveValue,GameState,T,Player,3,Move,BestMove,FinalBestMove).
 
     
 % Used to check if the value of the current testing board is better than the previous best one.

@@ -266,38 +266,6 @@ game_loop(GameState,Player,Winner,4,Level1,Level2):- %AIvAI  (4)
     checkForWinner([NewBoard,NewColorsWon,NewNPieces],NewPlayer,Winner,4,Level1,Level2).
 
 
-% Gets the bot difficulty according to the game mode. 
-get_bot_dificulty(1,_, _):- !.
-get_bot_dificulty(4, Difficulty1, Difficulty2):- 
-    !,
-    repeat,
-        write('         Difficulty for BOT 1:'), nl,
-        write('         1) Easy'), nl,
-        write('         2) Medium'), nl,
-        catch(read(AuxDifficulty1),_,true),
-        number(AuxDifficulty1),
-        between(1,2,AuxDifficulty1), !,
-    repeat,
-        write('         Difficulty for BOT 2:'), nl,
-        write('         1) Easy'), nl,
-        write('         2) Medium'), nl,
-        catch(read(AuxDifficulty2),_,true),
-        number(AuxDifficulty2),
-        between(1,2,AuxDifficulty2), !,
-    Difficulty1 = AuxDifficulty1,
-    Difficulty2 = AuxDifficulty2.
-
-get_bot_dificulty(_, Difficulty1, _):- 
-    !,
-    repeat,
-        write('         Difficulty for the BOT:'), nl,
-        write('         1) Easy'), nl,
-        write('         2) Medium'), nl,
-        catch(read(AuxDifficulty1),_,true),
-        number(AuxDifficulty1),
-        between(1,2,AuxDifficulty1), !,
-    Difficulty1 = AuxDifficulty1.
-
 % Starting predicate that initializes every variable needed to start.
 play :-
     prompt(_,''),
