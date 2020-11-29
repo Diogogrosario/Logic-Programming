@@ -317,7 +317,7 @@ Caso contrário, o jogo prossegue e a cor continua em disputa.
 ### Avaliação do tabuleiro
 A avaliação do tabuleiro é realizada no predicado value/2.
 ```prolog
-value([_, ColorsWon | _], Player, BotDiff,Length1,Length2, Value):-
+value([_, ColorsWon, BotDiff,Length1,Length2 | _], Player, Value):-
     captured_color_value(Player, ColorsWon, ColorValue),
     getPathValue(ColorsWon,BotDiff,Length1,Length2,PathValue),
     Value is ColorValue + PathValue.
@@ -352,6 +352,55 @@ getPathValue([Orange,Purple,Green], 2, [Length,Length1,Length2], _ ,PathValue):-
 Este predicado aproveita-se do tamanho dos caminhos calculados anteriormente. Optamos por atribuir 400 pontos a cada cor ganha e -400 por cada cor perdida, somando a estes valores a constante 9 - o tamanho do caminho mais curto de cada cor, sendo esta subtração elevada a 3 para valorizar cada vez mais distâncias mais curtas. No caso do nível hard de dificuldade é também subtraído o valor final dos caminhos do adversário que está sujeito às mesmas operações aritméticas.
 
 ### Jogada do computador
+A jogada do computador é feita no predicado choose_move/4.
+```prolog
+% Used to get a random move for the bot in the random dificulty.
+choose_move(GameState,Player,1,Move):- 
+    valid_moves(GameState,Player, ListOfMoves),
+    length(ListOfMoves,Length),
+    random(0,Length,RandomMove),
+    nth0(RandomMove,ListOfMoves,Move), sleep(1),
+    [Row,Diagonal,Color] = Move,
+    write('Putting piece of color '), write(Color), write(' at row '), write(Row), write(' and diagonal '), write(Diagonal), nl.
+
+choose_move(GameState,Player,BotDiff,Move):- 
+    valid_moves(GameState,Player, ListOfMoves),
+    simMoves(GameState,ListOfMoves,Player,BotDiff,_BestMove,-10000, NewMove),
+    length(NewMove,Length),
+    random(0,Length,RandomMove),
+    nth0(RandomMove,NewMove,Move),
+    [Row,Diagonal,Color] = Move,
+    write('Putting piece of color '), write(Color), write(' at row '), write(Row), write(' and diagonal '), write(Diagonal), nl.
+
+simMoves(_,[],_,_, BestMove,_, BestMove).
+simMoves(GameState,[Move | T], Player, 2, BestMove,BestMoveValue, FinalBestMove):-
+    [_, ColorsWon, NPieces] = GameState,
+    updateNPieces(Move,NPieces,_),
+    move(GameState, Move, [NewBoard | _]),  
+    updateColorsWon([NewBoard, ColorsWon],NewColorsWon, Player, 1, Length1, Length2),
+    value([NewBoard,NewColorsWon, 2,Length1,Length2], Player, Value),
+    canImprove(Value,BestMoveValue,GameState,T,Player,2,Move,BestMove,FinalBestMove).
+
+simMoves(GameState,[Move | T], Player, 3, BestMove,BestMoveValue, FinalBestMove):-
+    [_, ColorsWon, NPieces] = GameState,
+    updateNPieces(Move,NPieces,_),
+    move(GameState, Move, [NewBoard | _]),  
+    updateColorsWon([NewBoard, ColorsWon],NewColorsWon, Player,0 , Length1, Length2),
+    value([NewBoard,NewColorsWon,3,Length1,Length2], Player, Value),
+    canImprove(Value,BestMoveValue,GameState,T,Player,3,Move,BestMove,FinalBestMove).
+
+    
+canImprove(Value,BestMoveValue,GameState,T,Player,BotDiff,Move,_,FinalBestMove):-
+    Value > BestMoveValue,
+    simMoves(GameState,T,Player,BotDiff,[Move],Value,FinalBestMove).
+
+canImprove(Value,Value,GameState,T,Player,BotDiff,Move,BestMove,FinalBestMove):-
+    simMoves(GameState,T,Player,BotDiff,[Move | BestMove],Value,FinalBestMove).
+
+canImprove(_,BestMoveValue,GameState,T,Player,BotDiff,_,BestMove,FinalBestMove):-
+    simMoves(GameState,T,Player,BotDiff,BestMove,BestMoveValue,FinalBestMove).
+```
+O objetivo deste predicado é simular todos as jogadas disponíveis, avaliando o tabuleiro no final de cada, guardando o maior valor e as maiores jogadas. No final de cada move simulado é chamado canImprove, que verifica se o move avaliado é superior ao melhor move no momento.
 
 ## Conclusões
 
