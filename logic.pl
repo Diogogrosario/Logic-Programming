@@ -134,7 +134,8 @@ validMove(Row,Diagonal):-
     diagonal_index_end(Row,D2),
     valid_diagonal(Diagonal,D1,D2).
 
-% Funtion that calls every funtion needed to update the colors the players have won and parses the values, the 0 means that we don't save time while evaluating.
+% Funtion that calls every funtion needed to update the colors the players have won and parses the values,
+% the 0 means that both the players board state is evaluated.
 updateColorsWon([Board, [OrangeWon, PurpleWon, GreenWon | _ ] | _ ],NewColorsWon, Player, 0, Length1, Length2):-
     NewP is mod(Player+1,2),
 
@@ -183,6 +184,10 @@ checkForWinner([NewBoard,NewColorsWon,NewNPieces],NewPlayer,Winner,GameMode,Bot1
 
 
 % Used to decide how the next move is from (Player or AI) according to game mode and AI difficulty.
+getNextMove(GameState,_,_,_,Move,1):-
+    [Board | T] = GameState,
+    [_ , NPieces | _] = T,
+    get_move(Move,Board,NPieces).
 getNextMove(GameState,Player,_,_,Move,2):-
     [Board | T] = GameState,
     [_ , NPieces | _] = T,
@@ -209,13 +214,12 @@ getNextMove(GameState,Player,Level1,_,Move,4):-
     choose_move(GameState,Player,Level1,Move).
 
 
-% Game's main loops (Game mode is next to each loop)
-
-game_loop(GameState,Player,Winner,1,_,_):-  %PvP  (1)
-    [Board | T] = GameState,
+% Game's main loops
+game_loop(GameState,Player,Winner,GameMode,Level1,Level2):-
+    [_ | T] = GameState,
     [ColorsWon , NPieces | _] = T,
     display_game(GameState,Player),
-    get_move(Move,Board, NPieces),
+    getNextMove(GameState,Player,Level1,Level2,Move,GameMode),
     updateNPieces(Move,NPieces,NewNPieces),
     move(GameState, Move, NewGameState),
     [NewBoard | _] = NewGameState,
@@ -223,50 +227,7 @@ game_loop(GameState,Player,Winner,1,_,_):-  %PvP  (1)
     !,
     game_over([NewBoard,NewColorsWon,NewNPieces],Winner),
     update_player(Player, NewPlayer),
-    checkForWinner([NewBoard,NewColorsWon,NewNPieces],NewPlayer,Winner,1,_,_).
-      
-game_loop(GameState,Player,Winner,2,Level,_):- %PvAI  (2)
-    [_ | T] = GameState,
-    [ColorsWon , NPieces | _] = T,
-    display_game(GameState,Player),
-    getNextMove(GameState,Player,_,Level,Move,2),
-    updateNPieces(Move,NPieces,NewNPieces),
-    move(GameState, Move, NewGameState),    
-    [NewBoard | _] = NewGameState,
-    updateColorsWon([NewBoard, ColorsWon], NewColorsWon, Player,0, _, _),
-    !,
-    game_over([NewBoard,NewColorsWon,NewNPieces],Winner),
-    update_player(Player, NewPlayer),
-    checkForWinner([NewBoard,NewColorsWon,NewNPieces],NewPlayer,Winner,2,Level,_).
-
-game_loop(GameState,Player,Winner,3,Level,_):- %AIvP  (3)
-    [_ | T] = GameState,
-    [ColorsWon , NPieces | _] = T,
-    display_game(GameState,Player),
-    getNextMove(GameState,Player,Level,_,Move,3),
-    updateNPieces(Move,NPieces,NewNPieces),
-    move(GameState, Move, NewGameState),    
-    [NewBoard | _] = NewGameState,
-    updateColorsWon([NewBoard, ColorsWon], NewColorsWon, Player,0, _, _),
-    !,
-    game_over([NewBoard,NewColorsWon,NewNPieces],Winner),
-    update_player(Player, NewPlayer),
-    checkForWinner([NewBoard,NewColorsWon,NewNPieces],NewPlayer,Winner,3,Level,_).
-
-game_loop(GameState,Player,Winner,4,Level1,Level2):- %AIvAI  (4)
-    [_ | T] = GameState,
-    [ColorsWon , NPieces | _] = T,
-    display_game(GameState,Player),
-    getNextMove(GameState,Player,Level1,Level2,Move,4),
-    updateNPieces(Move,NPieces,NewNPieces),
-    move(GameState, Move, NewGameState),    
-    [NewBoard | _] = NewGameState,
-    updateColorsWon([NewBoard, ColorsWon], NewColorsWon, Player,0, _, _),
-    !,
-    game_over([NewBoard,NewColorsWon,NewNPieces],Winner),
-    update_player(Player, NewPlayer),
-    checkForWinner([NewBoard,NewColorsWon,NewNPieces],NewPlayer,Winner,4,Level1,Level2).
-
+    checkForWinner([NewBoard,NewColorsWon,NewNPieces],NewPlayer,Winner,GameMode,Level1,Level2).
 
 % Starting predicate that initializes every variable needed to start.
 play :-
