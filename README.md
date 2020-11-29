@@ -400,7 +400,7 @@ canImprove(Value,Value,GameState,T,Player,BotDiff,Move,BestMove,FinalBestMove):-
 canImprove(_,BestMoveValue,GameState,T,Player,BotDiff,_,BestMove,FinalBestMove):-
     simMoves(GameState,T,Player,BotDiff,BestMove,BestMoveValue,FinalBestMove).
 ```
-O objetivo deste predicado é simular todos as jogadas disponíveis, avaliando o tabuleiro no final de cada, guardando o maior valor e as maiores jogadas. No final de cada move simulado é chamado canImprove, que verifica se o move avaliado é superior ao melhor move no momento.
+O objetivo deste predicado é simular todos as jogadas disponíveis, avaliando o tabuleiro no final de cada, guardando o maior valor e as maiores jogadas. No final de cada move simulado é chamado canImprove, que verifica se o move avaliado é superior ao melhor move no momento. Caso existam mais do que uma jogada com o mesmo valor, são todas guardadas numa lista da qual será escolhida uma jogada aleatória entre as melhores jogadas possiveis.
 
 ## Conclusões
 Em suma, no final deste projeto consideramos que ficamos mais familiarizados com a linguagem prolog e com programação lógica em geral.  <br/>
