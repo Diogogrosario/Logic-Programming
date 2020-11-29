@@ -72,6 +72,9 @@ Para além disso display_game é responsável por dar display às cores já ganh
 ![Final Board Representation](./images/endBoard.png) <br/>
 
 ### Menus 
+#### Main Menu 
+<br/>
+
 ![Main Menu](./images/mainMenu.png) <br/>
 
 Neste menu o jogador consegue selecionar o modo de jogo pretendido de entre um total de quatro modos de jogo:
@@ -80,24 +83,111 @@ Neste menu o jogador consegue selecionar o modo de jogo pretendido de entre um t
 - Inteligência artificial contra jogador.
 - Inteligência artificial contra inteligência artificial.
 
-No modo jogador contra jogador, todas as jogadas têm que ser introduzidas pelos utilizadores, sendo que cada jogador introduz uma jogada à vez, sendo que o jogo é iniciado imediatamente após a seleção deste modo de jogo.
+No modo jogador contra jogador, todas as jogadas têm que ser introduzidas pelos utilizadores, sendo que cada jogador introduz uma jogada à vez.    
+O jogo é iniciado imediatamente após a seleção deste modo de jogo.
 
-<br/>
-<br/>
-Caso qualquer outro modo de jogo seja selecionado, um menu adicional será mostrado pedindo ao utilizador para escolher o nivel da inteligencia artificial. Existem as seguintes dificuldades: fácil, média e difícil.
+Caso qualquer outro modo de jogo seja selecionado, um menu adicional será mostrado pedindo ao utilizador para escolher o nivel da inteligência artificial. Existem as seguintes dificuldades: fácil, média e difícil.
 
-![dificulty Menu](./images/dificultyMenu.png) <br/>
+![Difficulty Menu](./images/difficultyMenu.png) <br/>
 
-Quando um dos jogadores é controlado pela inteligência artificial o jogador não precisa de tomar ação nenhuma para que o computador faça a sua jogada, apenas necessita de fazer as suas proprias jogadas.
+Quando um dos jogadores é controlado pela inteligência artificial, o computador irá fazer a sua jogada automaticamente.
 <br/>
 Os niveis de dificuldade causam comportamentos diferentes na forma como estes processam o tabuleiro atual:
-- Fácil: neste nivel não existe processamento nenhum, apenas é escolhido uma jogada válida aleatória.
-- Médio: a inteligência artificial tem um comportamento greedy em que analisa o apenas os seus caminhos não tendo em conta o estado do jogo para o seu adversário.
-- Difícil: igual à dificuldade média, mas nesta dificuldade a inteligência artificial tem em conta o estado do adversário, tentando dificultar-lhe as proximas jogadas.
+- Fácil: neste nivel não existe processamento nenhum, apenas é escolhida uma jogada válida aleatória.
+- Médio: a inteligência artificial tem um comportamento greedy em que analisa apenas os seus caminhos não tendo em conta o estado do jogo para o seu adversário. O AI irá sempre valorizar minimizar a distância dos seus caminhos.
+- Difícil: igual à dificuldade média, mas nesta dificuldade a inteligência artificial tem em conta o estado do jogo para o adversário, tentando dificultar-lhe as próximas jogadas.
 
 ### Lista de jogadas válidas
+A lista de jogadas válidas é obtida através do seguinte predicado.
+```prolog
+iterateRow([],_,_,_,NewListOfMoves,NewListOfMoves).
+iterateRow([Value | T ],CurrentRow,CurrentDiagonal,NPieces,ListOfMoves,FinalListOfMoves):-
+    get_possible_valid_move(Value,AuxOrange,AuxGreen,AuxPurple,CurrentRow,CurrentDiagonal,NPieces),
+    append([AuxPurple],[AuxOrange],AuxList),
+    append(AuxList,[AuxGreen],NewAuxList),
+    append(ListOfMoves,NewAuxList,NewListOfMoves),
+    NewDiagonal is CurrentDiagonal +1,
+    iterateRow(T,CurrentRow,NewDiagonal,NPieces,NewListOfMoves,FinalListOfMoves).
+
+iterateBoard([],_,_,FinalListOfMoves,FinalListOfMoves).
+iterateBoard([Row | T ],NPieces,CurrentRow,ListOfMoves,FinalListOfMoves):- 
+    diagonal_index(CurrentRow,Diagonal),
+    iterateRow(Row,CurrentRow,Diagonal,NPieces,ListOfMoves,RowListOfMoves),
+    NewRow is CurrentRow+1,
+    iterateBoard(T,NPieces,NewRow,RowListOfMoves,FinalListOfMoves).
+
+valid_moves([Board, _ , NPieces], _Player ,FinalListOfMoves):-
+    iterateBoard(Board,NPieces,0,_ , AuxFinalListOfMoves),
+    remove_dups(AuxFinalListOfMoves, NoDuplicateListOfMoves),
+    delete(NoDuplicateListOfMoves,[], FinalListOfMoves).
+```
+Estas jogadas são obtidas de forma recursiva, iterando pelo tabuleiro. Quando o valor da casa é empty, são adicionadas as 3 jogadas possíveis, a não ser que o número de peças de uma cor seja 0.
 
 ### Execução de jogadas
+O predicado de execução de jogadas é o predicado move/3.
+```prolog
+move([Board | T ], Move, NewGameState):-
+    [RowNumber|_] = Move,
+    getRow(Board,RowNumber,NewBoard,Move),
+    NewGameState = [NewBoard|T].
+```
+Este predicado recebe o move depois de validado pelos inputs e retorna o novo estado do jogo.
+
+Os inputs são feitos nos seguintes predicados
+
+```prolog
+getColor(Orange,_,_,'O',Orange).
+getColor(_,Purple,_,'P',Purple).
+getColor(_,_,Green,'G',Green).
+
+valid_color(Color,[Orange, Purple, Green | _ ]):-
+    atom(Color),
+    getColor(Orange,Purple,Green,Color,FinalColor),
+    writePiecesLeft(Color,FinalColor).
+
+get_line(Line):-
+    repeat,
+        write('Insert move line (0-22): '),
+        catch(read(Line),_,true),
+        valid_line(Line),!.
+
+get_diagonal(Diagonal, Line):-
+    diagonal_index(Line, D1),
+    diagonal_index_end(Line, D2),
+    repeat,
+        write('Insert move diagonal ('), write(D1), write('-'), write(D2), write(') :'),
+        catch(read(Diagonal),_,true),
+        valid_diagonal(Diagonal,D1,D2),!.
+
+get_color(Color,NPieces):-
+    skip_line,
+    repeat,
+        write('Insert move color (O, P, G): '),
+        catch(get_char(Aux),_,true),
+        skip_line,
+        valid_color(Aux,NPieces),
+        parse_color(Aux,Color),
+        !.
+
+errorMessage(empty).
+errorMessage(_):-
+  write('Invalid move, tile is not empty.'), nl,
+  fail.
+
+is_empty(Line,Diagonal,Board):-
+    nth0(Line,Board,Row),
+    diagonal_index(Line,X),
+    Diagonal_index_in_row is Diagonal - X,
+    nth0(Diagonal_index_in_row,Row,Elem),
+    errorMessage(Elem).
+
+get_move([Line,Diagonal,Color],Board, NPieces):-
+    repeat,
+        get_line(Line), 
+        get_diagonal(Diagonal, Line),
+        is_empty(Line,Diagonal,Board),!, 
+    get_color(Color,NPieces).
+```
 
 ### Final do jogo
 
