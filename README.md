@@ -228,8 +228,8 @@ updateColorsWon([Board, [OrangeWon, PurpleWon, GreenWon | _ ] | _ ],NewColorsWon
 
     NewColorsWon = [NewOrangeWon,NewPurpleWon,NewGreenWon].
 ```
-Este predicado é responsável por verificar o tamanho dos caminhos da cor laranja para ambos os players caso o predicado contenha o 0 a seguir ao player.
-No caso em que este valor é 1, a função apenas calcula os caminhos do player atual. Esta implementação específica foi necessário para reduzir o tempo ao bot greedy médio, que utiliza esta função para calcular o tamanho dos seus caminhos aquando da simulação dos movimentos válidos.    
+Este predicado é responsável por verificar o tamanho dos caminhos para ambos os players caso o predicado contenha o 0 a seguir ao player.
+No caso em que este valor é 1, a função apenas calcula os caminhos do player atual. Esta implementação específica foi necessário para reduzir o tempo ao bot greedy médio, que utiliza esta função para calcular o tamanho dos caminhos aquando da simulação dos movimentos válidos.    
 Este predicado serve-se das funções checkOrange, checkGreen e checkPurple para o cálculo do tamanho dos caminhos.
 ```prolog
 checkOrange(0,_,_,0,_).
