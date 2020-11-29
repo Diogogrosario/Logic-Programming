@@ -190,6 +190,123 @@ get_move([Line,Diagonal,Color],Board, NPieces):-
 ```
 
 ### Final do jogo
+O predicado game_over/2 é responsável por verificar o número de cores ganhas por cada jogador, retornando o winner em caso de vitória.
+
+```prolog
+count_occurrences(List, X, Count) :- aggregate_all(count, member(X, List), Count).
+
+game_over([ _ , ColorsWon | _ ], Winner):-
+    count_occurrences(ColorsWon,0,CountOfZero),
+    count_occurrences(ColorsWon,1,CountOfOne),
+    (CountOfZero < 2 ; Winner is 0),
+    (CountOfOne < 2 ; Winner is 1).
+```
+Para verificar as cores ganhas é usado o predicado updateColorsWon seguinte
+```prolog
+updateColorsWon([Board, [OrangeWon, PurpleWon, GreenWon | _ ] | _ ],NewColorsWon, Player, 0, Length1, Length2):-
+    NewP is mod(Player+1,2),
+
+    checkOrange(OrangeWon,Player,Board,NewOrangeWon,Orange1Length),
+    checkPurple(PurpleWon,Player,Board,NewPurpleWon,Purple1Length),
+    checkGreen(GreenWon,Player,Board,NewGreenWon,Green1Length),
+    Length1 = [Orange1Length,Purple1Length,Green1Length],
+
+    checkOrange(NewOrangeWon,NewP,Board,FinalOrangeWon,Orange2Length),
+    checkPurple(NewPurpleWon,NewP,Board,FinalPurpleWon,Purple2Length),
+    checkGreen(NewGreenWon,NewP,Board,FinalGreenWon,Green2Length),
+    Length2 = [Orange2Length,Purple2Length,Green2Length],
+
+    NewColorsWon = [FinalOrangeWon,FinalPurpleWon,FinalGreenWon].
+
+updateColorsWon([Board, [OrangeWon, PurpleWon, GreenWon | _ ] | _ ],NewColorsWon, Player, 1, Length1, Length2):-
+
+    checkOrange(OrangeWon,Player,Board,NewOrangeWon,Orange1Length),
+    checkPurple(PurpleWon,Player,Board,NewPurpleWon,Purple1Length),
+    checkGreen(GreenWon,Player,Board,NewGreenWon,Green1Length),
+    Length1 = [Orange1Length,Purple1Length,Green1Length],
+    Length2 = [0,0,0],
+
+    NewColorsWon = [NewOrangeWon,NewPurpleWon,NewGreenWon].
+```
+Este predicado é responsável por verificar o tamanho dos caminhos da cor laranja para ambos os players caso o predicado contenha o 0 a seguir ao player.
+No caso em que este valor é 1, a função apenas calcula os caminhos do player atual. Esta implementação específica foi necessário para reduzir o tempo ao bot greedy médio, que utiliza esta função para calcular o tamanho dos seus caminhos aquando da simulação dos movimentos válidos.    
+Este predicado serve-se das funções checkOrange, checkGreen e checkPurple para o cálculo do tamanho dos caminhos.
+```prolog
+checkOrange(0,_,_,0,_).
+checkOrange(1,_,_,1,_).
+checkOrange(_,Player,Board,NewOrangeWon,Orange1Length):-
+    getOrangePathLength(Player,Board,Orange1Length),
+    getNewWon(Player,Orange1Length,NewOrangeWon).
+
+checkPurple(0,_,_,0,_).
+checkPurple(1,_,_,1,_).
+checkPurple(_,Player,Board,NewPurpleWon,Purple1Length):-
+    getPurplePathLength(Player,Board,Purple1Length),
+    getNewWon(Player,Purple1Length,NewPurpleWon).
+
+
+checkGreen(0,_,_,0,_).
+checkGreen(1,_,_,1,_).
+checkGreen(_,Player,Board,NewGreenWon,Green1Length):-
+    getGreenPathLength(Player,Board,Green1Length),
+    getNewWon(Player,Green1Length,NewGreenWon).
+```
+Os casos iniciais de cada função servem para retornar o jogador que já ganhou a cor. Caso ninguém tenha ganho, o valor inicial será -1 e assim serão calculados os caminhos.
+```prolog
+getOrangePathLength(Player,Board,Length):-
+    ToVisit = [[0,0],[1,0],[2,0],[3,0],[4,0]],
+    allied(Player,orange,Allied),
+    getPathLength(Board,ToVisit,[],Allied,orange,0,Length).
+
+
+getPurplePathLength(Player,Board,Length):-
+    ToVisit = [[18,7],[19,8],[20,9],[21,10],[22,11]],
+    allied(Player,purple,Allied),
+    getPathLength(Board,ToVisit,[],Allied,purple,0,Length).
+
+getGreenPathLength(Player,Board,Length):-
+    ToVisit = [[7,1],[9,2],[11,3],[13,4],[15,5]],
+    allied(Player,green,Allied),
+    getPathLength(Board,ToVisit,[],Allied,green,0,Length).
+```
+A lista ToVisit começa numa das bordas da cor e segue em direção à outra borda.
+O tamanho é calculado na função getPathLength.
+```prolog
+getPathLength(_,[],_,_,_,_,-1).
+getPathLength(Board,ToVisit,LastVisited,Allied,CheckingColor,CurrentDepth,Depth):-
+    buildLevel(Board,[],ReturnLevel,ToVisit,LastVisited,Visited,Allied,CheckingColor,CurrentDepth), 
+    getNextPossibleVisited(ReturnLevel, [],ToVisitNext),
+    fillFinishLevel(Board,ToVisitNext,Visited,[],NewLevel,CheckingColor,Allied),
+    append(ReturnLevel,NewLevel,FinishedLevel),
+    append(Visited,NewLevel,NewVisited),
+    getNextPossibleVisited(NewLevel,[],NewToVisitNext),
+    append(NewToVisitNext,ToVisitNext,Aux),
+    remove_list(Aux,NewVisited,NextListOfTiles),
+    (
+        (
+            \+stopCondition(CheckingColor,FinishedLevel),
+            getNextPathLength(Board,NextListOfTiles,ToVisit,NewVisited,Allied,CheckingColor,Depth,CurrentDepth)
+        );
+        (
+            !,Depth is CurrentDepth
+        )
+    ).
+
+getNextPathLength(Board,_,ToVisit,_,Allied,CheckingColor,Depth,0):-
+    getPathLength(Board,ToVisit,[],Allied,CheckingColor,1,Depth).
+
+getNextPathLength(Board,NextListOfTiles,_,NewVisited,Allied,CheckingColor,Depth,CurrentDepth):-
+    CurrentDepth > 0,
+    NewDepth is CurrentDepth+1,
+    getPathLength(Board,NextListOfTiles,NewVisited,Allied,CheckingColor,NewDepth,Depth).
+``` 
+Este predicado é a função mais complexa do nosso projeto. O predicado irá construir níveis de casas que estarão todas à mesma distância da outra borda na função buildLevel. Caso alguma das bordas esteja presente no nível é retornada esse tamanho, uma vez que será sp o tamanho mínimo. Caso contrário é criado o nível seguinte e repetido o processo. 
+Em baixo um esboço para melhor ilustrar este processo.
+![Esboço](./images/levels.png) <br/>
+Black -> Level 0
+Grey -> Level 1 
+
+
 
 ### Avaliação do tabuleiro
 
