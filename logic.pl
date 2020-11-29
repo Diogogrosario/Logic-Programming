@@ -134,8 +134,8 @@ validMove(Row,Diagonal):-
     diagonal_index_end(Row,D2),
     valid_diagonal(Diagonal,D1,D2).
 
-% Funtion that calls every funtion needed to update the colors the players have won and parses the values.
-updateColorsWon([Board, [OrangeWon, PurpleWon, GreenWon | _ ] | _ ],NewColorsWon, Player, Length1, Length2):-
+% Funtion that calls every funtion needed to update the colors the players have won and parses the values, the 0 means that we don't save time while evaluating.
+updateColorsWon([Board, [OrangeWon, PurpleWon, GreenWon | _ ] | _ ],NewColorsWon, Player, 0, Length1, Length2):-
     NewP is mod(Player+1,2),
 
     checkOrange(OrangeWon,Player,Board,NewOrangeWon,Orange1Length),
@@ -149,6 +149,16 @@ updateColorsWon([Board, [OrangeWon, PurpleWon, GreenWon | _ ] | _ ],NewColorsWon
     Length2 = [Orange2Length,Purple2Length,Green2Length],
 
     NewColorsWon = [FinalOrangeWon,FinalPurpleWon,FinalGreenWon].
+
+updateColorsWon([Board, [OrangeWon, PurpleWon, GreenWon | _ ] | _ ],NewColorsWon, Player, 1, Length1, Length2):-
+
+    checkOrange(OrangeWon,Player,Board,NewOrangeWon,Orange1Length),
+    checkPurple(PurpleWon,Player,Board,NewPurpleWon,Purple1Length),
+    checkGreen(GreenWon,Player,Board,NewGreenWon,Green1Length),
+    Length1 = [Orange1Length,Purple1Length,Green1Length],
+    Length2 = [0,0,0],
+
+    NewColorsWon = [NewOrangeWon,NewPurpleWon,NewGreenWon].
 
 % Records the use of a piece (removes from the count).
 usePiece(orange,[Orange,Purple,Green | _] ,[NewOrange,Purple,Green]):-
@@ -207,7 +217,7 @@ game_loop(GameState,Player,Winner,1,_,_):-  %PvP  (1)
     updateNPieces(Move,NPieces,NewNPieces),
     move(GameState, Move, NewGameState),
     [NewBoard | _] = NewGameState,
-    updateColorsWon([NewBoard, ColorsWon],NewColorsWon, Player, _, _),
+    updateColorsWon([NewBoard, ColorsWon],NewColorsWon, Player,0, _, _),
     !,
     game_over([NewBoard,NewColorsWon,NewNPieces],Winner),
     update_player(Player, NewPlayer),
@@ -221,7 +231,7 @@ game_loop(GameState,Player,Winner,2,Level,_):- %PvAI  (2)
     updateNPieces(Move,NPieces,NewNPieces),
     move(GameState, Move, NewGameState),    
     [NewBoard | _] = NewGameState,
-    updateColorsWon([NewBoard, ColorsWon], NewColorsWon, Player, _, _),
+    updateColorsWon([NewBoard, ColorsWon], NewColorsWon, Player,0, _, _),
     !,
     game_over([NewBoard,NewColorsWon,NewNPieces],Winner),
     update_player(Player, NewPlayer),
@@ -235,7 +245,7 @@ game_loop(GameState,Player,Winner,3,Level,_):- %AIvP  (3)
     updateNPieces(Move,NPieces,NewNPieces),
     move(GameState, Move, NewGameState),    
     [NewBoard | _] = NewGameState,
-    updateColorsWon([NewBoard, ColorsWon], NewColorsWon, Player, _, _),
+    updateColorsWon([NewBoard, ColorsWon], NewColorsWon, Player,0, _, _),
     !,
     game_over([NewBoard,NewColorsWon,NewNPieces],Winner),
     update_player(Player, NewPlayer),
@@ -245,11 +255,11 @@ game_loop(GameState,Player,Winner,4,Level1,Level2):- %AIvAI  (4)
     [_ | T] = GameState,
     [ColorsWon , NPieces | _] = T,
     display_game(GameState,Player),
-    getNextMove(GameState,Player,Level1,Level2,Move),
+    getNextMove(GameState,Player,Level1,Level2,Move,4),
     updateNPieces(Move,NPieces,NewNPieces),
     move(GameState, Move, NewGameState),    
     [NewBoard | _] = NewGameState,
-    updateColorsWon([NewBoard, ColorsWon], NewColorsWon, Player, _, _),
+    updateColorsWon([NewBoard, ColorsWon], NewColorsWon, Player,0, _, _),
     !,
     game_over([NewBoard,NewColorsWon,NewNPieces],Winner),
     update_player(Player, NewPlayer),

@@ -1,7 +1,7 @@
 % Calculates the value of the board
-value([_, ColorsWon | _], Player,Length1,Length2, Value):-
+value([_, ColorsWon | _], Player, BotDiff,Length1,Length2, Value):-
     captured_color_value(Player, ColorsWon, ColorValue),
-    getPathValue(ColorsWon,Length1,Length2,PathValue),
+    getPathValue(ColorsWon,BotDiff,Length1,Length2,PathValue),
     Value is ColorValue + PathValue.
 
 % Calculates the value of the captured colors (+400 for player colors, 0 for neutral and -400 for opponent's color)
@@ -79,7 +79,7 @@ get_Value(_,Length,Value):-
 % It's used as a part of the funtion to evaluate the best possible move the bot can do since its called when testing all valid moves.
 % The function gets the number of pieces necessary to finish building the path by using an algorithm similar to a breadth-first search algorithm.~
 % The value is obtained by putting 9 minus the pieces necessary to finish the path to the power of three.
-getPathValue([Orange,Purple,Green], [Length,Length1,Length2], [OppLength,OppLength1,OppLength2],PathValue):-
+getPathValue([Orange,Purple,Green], 3, [Length,Length1,Length2], [OppLength,OppLength1,OppLength2],PathValue):-
     get_Value(Orange,Length,PlayerValue),
     get_Value(Purple,Length1,PlayerValue1),
     get_Value(Green,Length2,PlayerValue2),
@@ -87,6 +87,12 @@ getPathValue([Orange,Purple,Green], [Length,Length1,Length2], [OppLength,OppLeng
     get_Value(Purple,OppLength1,OppValue1),
     get_Value(Green,OppLength2,OppValue2),
     PathValue is PlayerValue + PlayerValue1 + PlayerValue2 - OppValue - OppValue1 - OppValue2.
+
+getPathValue([Orange,Purple,Green], 2, [Length,Length1,Length2], _ ,PathValue):-
+    get_Value(Orange,Length,PlayerValue),
+    get_Value(Purple,Length1,PlayerValue1),
+    get_Value(Green,Length2,PlayerValue2),
+    PathValue is PlayerValue + PlayerValue1 + PlayerValue2.
 
 % Function used to set up the search for the pieces necessary to make a path between the orange boarders
 getOrangePathLength(Player,Board,Length):-
@@ -250,7 +256,7 @@ choose_move(GameState,Player,1,Move):-
 % Used to get a move for the bot in the greedy dificulty.
 choose_move(GameState,Player,2,Move):- 
     valid_moves(GameState,Player, ListOfMoves),
-    simMoves(GameState,ListOfMoves,Player,_BestMove,-10000, NewMove),
+    simMoves(GameState,ListOfMoves,Player,2,_BestMove,-10000, NewMove),
     length(NewMove,Length),
     random(0,Length,RandomMove),
     nth0(RandomMove,NewMove,Move),
@@ -259,24 +265,24 @@ choose_move(GameState,Player,2,Move):-
 
 % Used to create a game state with simulated moves obtained from the function vali_moves.
 % The new game state is then evaluated and the best game state is used to make a move for the bot.
-simMoves(_,[],_, BestMove,_, BestMove).
-simMoves(GameState,[Move | T], Player, BestMove,BestMoveValue, FinalBestMove):-
+simMoves(_,[],_,_, BestMove,_, BestMove).
+simMoves(GameState,[Move | T], Player, BotDiff, BestMove,BestMoveValue, FinalBestMove):-
     [_, ColorsWon, NPieces] = GameState,
     updateNPieces(Move,NPieces,_),
     move(GameState, Move, [NewBoard | _]),  
-    updateColorsWon([NewBoard, ColorsWon],NewColorsWon, Player, Length1, Length2),
-    value([NewBoard,NewColorsWon], Player,Length1,Length2, Value),
-    canImprove(Value,BestMoveValue,GameState,T,Player,Move,BestMove,FinalBestMove).
+    updateColorsWon([NewBoard, ColorsWon],NewColorsWon, Player, 1, Length1, Length2),
+    value([NewBoard,NewColorsWon], Player,BotDiff,Length1,Length2, Value),
+    canImprove(Value,BestMoveValue,GameState,T,Player,BotDiff,Move,BestMove,FinalBestMove).
 
     
 % Used to check if the value of the current testing board is better than the previous best one.
 % The moves with the same value are saved in a list and a random among those is used.
-canImprove(Value,BestMoveValue,GameState,T,Player,Move,_,FinalBestMove):-
+canImprove(Value,BestMoveValue,GameState,T,Player,BotDiff,Move,_,FinalBestMove):-
     Value > BestMoveValue,
-    simMoves(GameState,T,Player,[Move],Value,FinalBestMove).
+    simMoves(GameState,T,Player,BotDiff,[Move],Value,FinalBestMove).
 
-canImprove(Value,Value,GameState,T,Player,Move,BestMove,FinalBestMove):-
-    simMoves(GameState,T,Player,[Move | BestMove],Value,FinalBestMove).
+canImprove(Value,Value,GameState,T,Player,BotDiff,Move,BestMove,FinalBestMove):-
+    simMoves(GameState,T,Player,BotDiff,[Move | BestMove],Value,FinalBestMove).
 
-canImprove(_,BestMoveValue,GameState,T,Player,_,BestMove,FinalBestMove):-
-    simMoves(GameState,T,Player,BestMove,BestMoveValue,FinalBestMove).
+canImprove(_,BestMoveValue,GameState,T,Player,BotDiff,_,BestMove,FinalBestMove):-
+    simMoves(GameState,T,Player,BotDiff,BestMove,BestMoveValue,FinalBestMove).
