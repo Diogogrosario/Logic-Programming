@@ -409,3 +409,5 @@ Uma das limitações do nosso projeto é a impossibilidade de desfazer uma jogad
 Uma forma de melhorar o trabalho seria tentar optimizar a função de avaliação do tabuleiro para se assemelhar a um algoritmo minimax de forma a diminuir o tempo de processamento.<br/>
 
 ## Bibliografia
+- [Documentação SICStus](https://sicstus.sics.se/sicstus/docs/latest4/html/sicstus.html/)
+- [Replace element inside matrix](https://stackoverflow.com/questions/8519203/prolog-replace-an-element-in-a-list-at-a-specified-index)
