@@ -300,15 +300,56 @@ getNextPathLength(Board,NextListOfTiles,_,NewVisited,Allied,CheckingColor,Depth,
     NewDepth is CurrentDepth+1,
     getPathLength(Board,NextListOfTiles,NewVisited,Allied,CheckingColor,NewDepth,Depth).
 ``` 
-Este predicado é a função mais complexa do nosso projeto. O predicado irá construir níveis de casas que estarão todas à mesma distância da outra borda na função buildLevel. Caso alguma das bordas esteja presente no nível é retornada esse tamanho, uma vez que será sp o tamanho mínimo. Caso contrário é criado o nível seguinte e repetido o processo. 
+Este predicado é a função mais complexa do nosso projeto. O predicado irá construir níveis de casas que estarão todas à mesma distância da outra borda na função buildLevel. Caso alguma das bordas esteja presente no nível é retornada esse tamanho, uma vez que será sp o tamanho mínimo. Caso contrário é criado o nível seguinte e repetido o processo. <br/>
 Em baixo um esboço para melhor ilustrar este processo.
 ![Esboço](./images/levels.png) <br/>
-Black -> Level 0
-Grey -> Level 1 
-
-
+Black -> Level 0 <br/>
+Grey -> Level 1 <br/>
+Red -> Level 2<br/>
+Yellow -> Level 3<br/>
+Purple -> Level 4<br/>
+Green -> Level 5<br/>
+Blue -> Level 6<br/>
+Caso o tamanho do caminho seja 0, significa que a cor foi ganha pelo player que jogou em último.
+Caso seja -1, significa que o player atual tem a cor bloqueada pelo adversário e, por esse motivo, a perdeu.
+Caso contrário, o jogo prossegue e a cor continua em disputa.
 
 ### Avaliação do tabuleiro
+A avaliação do tabuleiro é realizada no predicado value/2.
+```prolog
+value([_, ColorsWon | _], Player, BotDiff,Length1,Length2, Value):-
+    captured_color_value(Player, ColorsWon, ColorValue),
+    getPathValue(ColorsWon,BotDiff,Length1,Length2,PathValue),
+    Value is ColorValue + PathValue.
+
+captured_color_value(Player, ColorsWon,ColorValue):-
+    count_occurrences(ColorsWon,Player,CountOfPlayer),
+    NewP is mod(Player+1,2),
+    count_occurrences(ColorsWon,NewP,CountOfOpponent),
+    AuxValue is 0 + CountOfPlayer * 400,
+    ColorValue is AuxValue - (CountOfOpponent * 400).
+
+get_Value(0,_,0).
+get_Value(1,_,0).
+get_Value(_,Length,Value):-
+    Value is (9-Length)*(9-Length)*(9-Length).
+
+getPathValue([Orange,Purple,Green], 3, [Length,Length1,Length2], [OppLength,OppLength1,OppLength2],PathValue):-
+    get_Value(Orange,Length,PlayerValue),
+    get_Value(Purple,Length1,PlayerValue1),
+    get_Value(Green,Length2,PlayerValue2),
+    get_Value(Orange,OppLength,OppValue),
+    get_Value(Purple,OppLength1,OppValue1),
+    get_Value(Green,OppLength2,OppValue2),
+    PathValue is PlayerValue + PlayerValue1 + PlayerValue2 - OppValue - OppValue1 - OppValue2.
+
+getPathValue([Orange,Purple,Green], 2, [Length,Length1,Length2], _ ,PathValue):-
+    get_Value(Orange,Length,PlayerValue),
+    get_Value(Purple,Length1,PlayerValue1),
+    get_Value(Green,Length2,PlayerValue2),
+    PathValue is PlayerValue + PlayerValue1 + PlayerValue2.
+```
+Este predicado aproveita-se do tamanho dos caminhos calculados anteriormente. Optamos por atribuir 400 pontos a cada cor ganha e -400 por cada cor perdida, somando a estes valores a constante 9 - o tamanho do caminho mais curto de cada cor, sendo esta subtração elevada a 3 para valorizar cada vez mais distâncias mais curtas. No caso do nível hard de dificuldade é também subtraído o valor final dos caminhos do adversário que está sujeito às mesmas operações aritméticas.
 
 ### Jogada do computador
 
