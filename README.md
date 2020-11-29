@@ -405,7 +405,7 @@ O objetivo deste predicado é simular todos as jogadas disponíveis, avaliando o
 ## Conclusões
 Em suma, no final deste projeto consideramos que ficamos mais familiarizados com a linguagem prolog e com programação lógica em geral.  <br/>
 Consideramos também que conseguimos criar um programa que se assemelha ao jogo "Alliances" de forma completa e robusta, capaz de ser posteriormente adaptado por interfaces gráficas de forma a criar uma experiência mais completa ao utilizador. <br/>
-Uma das limitações do nosso projeto é a impossibilidade de desfazer uma jogada após a realizar. Para além disso, devido ao tabuleiro de forma hexagonal, não é possivel utilizar o sistema de coordenadas tradicional sendo que foi preciso criar um que se adapta ao nosso tabuleiro, sendo que o que foi criado é um pouco confuso de utilizar no inicio.  <br/>
+Uma das limitações do nosso projeto é a impossibilidade de desfazer uma jogada após a realizar. Para além disso, devido ao tabuleiro de forma hexagonal, não é possivel utilizar o sistema de coordenadas tradicional sendo que foi preciso criar um que se adapta ao nosso tabuleiro, sendo que o que foi criado é um pouco confuso de utilizar no início.  <br/>
 Uma forma de melhorar o trabalho seria tentar optimizar a função de avaliação do tabuleiro para se assemelhar a um algoritmo minimax de forma a diminuir o tempo de processamento.<br/>
 
 ## Bibliografia
