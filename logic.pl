@@ -193,7 +193,7 @@ getNextMove(GameState,Player,_,_,Move,2):-
     [_ , NPieces | _] = T,
     Player =:= 0,
     get_move(Move,Board,NPieces).
-getNextMove(GameState,Player,_,Level1,Move,2):-
+getNextMove(GameState,Player,Level1,_,Move,2):-
     Player =:= 1,
     choose_move(GameState,Player,Level1,Move).
 
