@@ -1,5 +1,5 @@
 % Calculates the value of the board
-value([_, ColorsWon | _], Player, BotDiff,Length1,Length2, Value):-
+value([_, ColorsWon, BotDiff,Length1,Length2 | _], Player, Value):-
     captured_color_value(Player, ColorsWon, ColorValue),
     getPathValue(ColorsWon,BotDiff,Length1,Length2,PathValue),
     Value is ColorValue + PathValue.
@@ -272,7 +272,7 @@ simMoves(GameState,[Move | T], Player, 2, BestMove,BestMoveValue, FinalBestMove)
     updateNPieces(Move,NPieces,_),
     move(GameState, Move, [NewBoard | _]),  
     updateColorsWon([NewBoard, ColorsWon],NewColorsWon, Player, 1, Length1, Length2),
-    value([NewBoard,NewColorsWon], Player,2,Length1,Length2, Value),
+    value([NewBoard,NewColorsWon, 2,Length1,Length2], Player, Value),
     canImprove(Value,BestMoveValue,GameState,T,Player,2,Move,BestMove,FinalBestMove).
 
 simMoves(GameState,[Move | T], Player, 3, BestMove,BestMoveValue, FinalBestMove):-
@@ -280,7 +280,7 @@ simMoves(GameState,[Move | T], Player, 3, BestMove,BestMoveValue, FinalBestMove)
     updateNPieces(Move,NPieces,_),
     move(GameState, Move, [NewBoard | _]),  
     updateColorsWon([NewBoard, ColorsWon],NewColorsWon, Player,0 , Length1, Length2),
-    value([NewBoard,NewColorsWon], Player,3,Length1,Length2, Value),
+    value([NewBoard,NewColorsWon,3,Length1,Length2], Player, Value),
     canImprove(Value,BestMoveValue,GameState,T,Player,3,Move,BestMove,FinalBestMove).
 
     
