@@ -42,13 +42,12 @@ getValue(Board,RowNumber,Diagonal,Color):-
     nth0(DiagonalDiff,Row,Color).
 
 
-% gotten from https://stackoverflow.com/questions/8519203/prolog-replace-an-element-in-a-list-at-a-specified-index/8544713
 % replaces a value in a list
-replace_val([_|T], 0, X, [X|T]).
-replace_val([H|T], I, X, [H|R]):- 
-  I > 0, 
-  I1 is I-1, 
-  replace_val(T, I1, X, R).
+replace_val([_|T], 0, Value, [Value|T]).
+replace_val([H|T], DiagonalNum, Value, [H|NextValue]):- 
+  DiagonalNum > 0, 
+  NewDiagonalNum is DiagonalNum-1, 
+  replace_val(T, NewDiagonalNum, Value, NextValue).
 
 % Gets a desired row of the board.
 getRow([Row|T],0,[NewRow|T],[InitialRow|V]):-
