@@ -441,7 +441,7 @@ canImprove(_,BestMoveValue,GameState,T,Player,BotDiff,_,BestMove,FinalBestMove):
 ```
 O objetivo deste predicado é simular todos as jogadas disponíveis, avaliando o tabuleiro no final de cada, guardando o maior valor e as maiores jogadas. No final de cada move simulado é chamado canImprove, que verifica se o move avaliado é superior ao melhor move no momento. Caso existam mais do que uma jogada com o mesmo valor, são todas guardadas numa lista da qual será escolhida uma jogada aleatória entre as melhores jogadas possiveis.  
 A lista de jogadas possiveis são obtidas pelo predicado valid_moves.  
-Quando se decide numa jogada entre as melhores jogadas possiveis, essa jogada é guardada sendo posteriormente utilizada no predicado move\3 para a realizar no tabuleiro, passando depois a vez de jogar ao jogador ou à inteligência artificial oponente, dependendo do modo de jogo.  
+Quando se decide numa jogada entre as melhores jogadas possiveis, essa jogada é guardada sendo posteriormente utilizada no predicado move/3 para a realizar no tabuleiro, passando depois a vez de jogar ao jogador ou à inteligência artificial oponente, dependendo do modo de jogo.  
 Para além disso, dependendo da dificuladadee da IA, o predicado choose_move difere em alguns aspetos.  
 Caso a dificuldade seja fácil, não existe simulação de jogadas nenhuma, apenas escolhe uma jogada aleatória entre todas as jogadas possíveis. Se for média ou difícil, aí já existe processamento dos tabuleiros e simulação de jogadas. Na dificuldade média, para todas as simulações de jogadas apenas o estado do BOT é avaliado não tendo em conta se aquela jogada ajuda ou não o oponente, mas na difícil isso já esta a ser considerado, fazendo o BOT escolher jogadas que tentam prejudicar o oponente.
 
