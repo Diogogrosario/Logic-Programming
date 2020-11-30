@@ -125,9 +125,8 @@ valid_moves([Board, _ , NPieces], _Player ,FinalListOfMoves):-
     remove_dups(AuxFinalListOfMoves, NoDuplicateListOfMoves),
     delete(NoDuplicateListOfMoves,[], FinalListOfMoves).
 ```
-Estas jogadas são obtidas de forma recursiva, iterando pelo tabuleiro. Quando o valor da casa é empty, são adicionadas as 3 jogadas possíveis, a não ser que o número de peças de uma cor seja 0.  
-Estas jogadas são guardadas na lista "FinalListOfMoves" e são posteriormente usadas para simulação dos tabuleiros possiveis de obter quando se calcula a jogada da inteligência artificial.  
-Este predicado revelou-se bastante util e eficáz para a ajuda da simulação de todos os possiveis tabuleiros tendo em conta o estado atual, visto ter uma execução bastante rápida e consistente.
+Estas jogadas são obtidas de forma recursiva, iterando pelo tabuleiro. Quando o valor da casa é empty, são adicionadas as 3 jogadas possíveis, a não ser que o número de peças de uma cor seja 0, sendo guardadas na lista "FinalListOfMoves" e, posteriormente, usadas para simulação dos tabuleiros possiveis de obter quando se calcula a jogada da inteligência artificial.  
+Este predicado revelou-se bastante útil e eficaz para a ajuda da simulação de todos os possiveis tabuleiros tendo em conta o estado atual, visto ter uma execução bastante rápida e consistente.
 
 ### Execução de jogadas
 O predicado de execução de jogadas é o predicado move/3.
@@ -195,8 +194,8 @@ get_move([Line,Diagonal,Color],Board, NPieces):-
     get_color(Color,NPieces).
 ```
 
-A validação é feita pelas funções valid_color/2, aquando do read da diagonal (get_diagonal/2) e linha (get_line/1) e posteriormente, após ter os inputs todos, pela função is_empty/3, que verifica se a casa que se pretende jogar está vazia ou não. Caso não esteja vazia é pedida uma nova jogada.  
-A jogada é feita iterando as linhas do game state (get_row/4), e quando se alcança a linha pretendida, é utilizado o predicado replace_val/4 para substituir na diagonal correta a peça que foi recebida como input. O novo game tabuleiro é guardado em "NewBoard", sendo posteriormente atualizado o game state com este novo tabuleiro.  
+A validação é feita pelas funções valid_color/2, aquando do read da diagonal (get_diagonal/2) e linha (get_line/1) e , posteriormente, após ter os inputs todos, pela função is_empty/3, que verifica se a casa que se pretende jogar está vazia ou não. Caso não esteja vazia é pedida uma nova jogada.  
+A jogada é feita iterando as linhas do game state (get_row/4), e quando se alcança a linha pretendida, é utilizado o predicado replace_val/4 para substituir na diagonal correta a peça que foi recebida como input. O novo game tabuleiro é guardado em "NewBoard", sendo atualizado o game state com este novo tabuleiro.  
 Estas trocas de tabuleiro e obtenção do novo tabuleiro são coordenados pela função move/3.  
 
 ```prolog
@@ -440,10 +439,10 @@ canImprove(_,BestMoveValue,GameState,T,Player,BotDiff,_,BestMove,FinalBestMove):
     simMoves(GameState,T,Player,BotDiff,BestMove,BestMoveValue,FinalBestMove).
 ```
 O objetivo deste predicado é simular todos as jogadas disponíveis, avaliando o tabuleiro no final de cada, guardando o maior valor e as maiores jogadas. No final de cada move simulado é chamado canImprove, que verifica se o move avaliado é superior ao melhor move no momento. Caso existam mais do que uma jogada com o mesmo valor, são todas guardadas numa lista da qual será escolhida uma jogada aleatória entre as melhores jogadas possiveis.  
-A lista de jogadas possiveis são obtidas pelo predicado valid_moves.  
-Quando se decide numa jogada entre as melhores jogadas possiveis, essa jogada é guardada sendo posteriormente utilizada no predicado move/3 para a realizar no tabuleiro, passando depois a vez de jogar ao jogador ou à inteligência artificial oponente, dependendo do modo de jogo.  
-Para além disso, dependendo da dificuladadee da IA, o predicado choose_move difere em alguns aspetos.  
-Caso a dificuldade seja fácil, não existe simulação de jogadas nenhuma, apenas escolhe uma jogada aleatória entre todas as jogadas possíveis. Se for média ou difícil, aí já existe processamento dos tabuleiros e simulação de jogadas. Na dificuldade média, para todas as simulações de jogadas apenas o estado do BOT é avaliado não tendo em conta se aquela jogada ajuda ou não o oponente, mas na difícil isso já esta a ser considerado, fazendo o BOT escolher jogadas que tentam prejudicar o oponente.
+A lista de jogadas possiveis é obtida pelo predicado valid_moves.  
+Quando se decide numa jogada entre as melhores jogadas possiveis, essa jogada é guardada e utilizada no predicado move/3 para atualizar o tabuleiro.
+Para além disso, dependendo da dificuladade da IA, o predicado choose_move difere em alguns aspetos.  
+Caso a dificuldade seja fácil, não existe simulação de jogadas nenhuma, apenas escolhe uma jogada aleatória entre todas as jogadas possíveis. Se for média ou difícil, já existe processamento dos tabuleiros e simulação de jogadas. Na dificuldade média, para todas as simulações de jogadas apenas o estado do BOT é avaliado não tendo em conta se aquela jogada ajuda ou não o oponente. Na dificuldade difícil está a ser considerado o tabuleiro no seu todo, fazendo o BOT escolher jogadas que tentam prejudicar o oponente e benficiar-se ao mesmo tempo.
 
 
 ## Conclusões
