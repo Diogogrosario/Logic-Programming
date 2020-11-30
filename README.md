@@ -64,7 +64,7 @@ display_line(H,NRow) :-
 Outros predicados auxiliares podem ser encontrados no seguinte [ficheiro](./display.pl) como, por exemplo, display_player que dá display ao próximo jogador a jogar.
 O predicado display_game dá display ao board, bem como a primeira e última linha (close_hex_top e close_hex_bot respetivamente) visto que o display destas linhas é diferente das restantes. O resto das linhas é realizado dentro da função display board que é chamada recursivamente e dá display linha a linha do hexágono.
 Para além disso display_game é responsável por dar display às cores já ganhas bem como o número de peças restantes e as alianças de cada jogador.  
-Visto que as linhas do tabuleiro têm finais e inícios diferentes entre sí, foi necessário criar dois factos auxiliares, start_value\2 e end_value\2, que a associam uma linha ao início/fim correto.  
+Visto que as linhas do tabuleiro têm finais e inícios diferentes entre sí, foi necessário criar dois factos auxiliares, start_value/2 e end_value/2, que a associam uma linha ao início/fim correto.  
 Foi também criado um predicado writeNspaces\1 que recebe um inteiro e imprime esse número de espaços, de forma a facilitar a formatação do tabuleiro.
 
 ### Estado intermédio
@@ -195,9 +195,9 @@ get_move([Line,Diagonal,Color],Board, NPieces):-
     get_color(Color,NPieces).
 ```
 
-A validação é feita pelas funções valid_color\2, aquando do read da diagonal (get_diagonal\2) e linha (get_line\1) e posteriormente, após ter os inputs todos, pela função is_empty\3, que verifica se a casa que se pretende jogar está vazia ou não. Caso não esteja vazia é pedida uma nova jogada.  
-A jogada é feita iterando as linhas do game state (get_row\4), e quando se alcança a linha pretendida, é utilizado o predicado replace_val\4 para substituir na diagonal correta a peça que foi recebida como input. O novo game tabuleiro é guardado em "NewBoard", sendo posteriormente atualizado o game state com este novo tabuleiro.  
-Estas trocas de tabuleiro e obtenção do novo tabuleiro são coordenados pela função move\3.  
+A validação é feita pelas funções valid_color/2, aquando do read da diagonal (get_diagonal/2) e linha (get_line/1) e posteriormente, após ter os inputs todos, pela função is_empty/3, que verifica se a casa que se pretende jogar está vazia ou não. Caso não esteja vazia é pedida uma nova jogada.  
+A jogada é feita iterando as linhas do game state (get_row\4), e quando se alcança a linha pretendida, é utilizado o predicado replace_val/4 para substituir na diagonal correta a peça que foi recebida como input. O novo game tabuleiro é guardado em "NewBoard", sendo posteriormente atualizado o game state com este novo tabuleiro.  
+Estas trocas de tabuleiro e obtenção do novo tabuleiro são coordenados pela função move/3.  
 
 ```prolog
 % replaces a value in a list
