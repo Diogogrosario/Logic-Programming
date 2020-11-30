@@ -63,7 +63,9 @@ display_line(H,NRow) :-
 ```
 Outros predicados auxiliares podem ser encontrados no seguinte [ficheiro](./display.pl) como, por exemplo, display_player que dá display ao próximo jogador a jogar.
 O predicado display_game dá display ao board, bem como a primeira e última linha (close_hex_top e close_hex_bot respetivamente) visto que o display destas linhas é diferente das restantes. O resto das linhas é realizado dentro da função display board que é chamada recursivamente e dá display linha a linha do hexágono.
-Para além disso display_game é responsável por dar display às cores já ganhas bem como o número de peças restantes e as alianças de cada jogador. 
+Para além disso display_game é responsável por dar display às cores já ganhas bem como o número de peças restantes e as alianças de cada jogador.  
+Visto que as linhas do tabuleiro têm finais e inícios diferentes entre sí, foi necessário criar dois factos auxiliares, start_value\2 e end_value\2, que a associam uma linha ao início/fim correto.  
+Foi também criado um predicado writeNspaces\1 que recebe um inteiro e imprime esse número de espaços, de forma a facilitar a formatação do tabuleiro.
 
 ### Estado intermédio
 ![Mid Board Representation](./images/midBoard.png) <br />
@@ -89,6 +91,8 @@ O jogo é iniciado imediatamente após a seleção deste modo de jogo.
 Caso qualquer outro modo de jogo seja selecionado, um menu adicional será mostrado pedindo ao utilizador para escolher o nivel da inteligência artificial. Existem as seguintes dificuldades: fácil, média e difícil.
 
 ![Difficulty Menu](./images/difficultyMenu.png) <br/>
+
+#### Difficulty Menu
 
 Quando um dos jogadores é controlado pela inteligência artificial, o computador irá fazer a sua jogada automaticamente.
 <br/>
@@ -121,7 +125,9 @@ valid_moves([Board, _ , NPieces], _Player ,FinalListOfMoves):-
     remove_dups(AuxFinalListOfMoves, NoDuplicateListOfMoves),
     delete(NoDuplicateListOfMoves,[], FinalListOfMoves).
 ```
-Estas jogadas são obtidas de forma recursiva, iterando pelo tabuleiro. Quando o valor da casa é empty, são adicionadas as 3 jogadas possíveis, a não ser que o número de peças de uma cor seja 0.
+Estas jogadas são obtidas de forma recursiva, iterando pelo tabuleiro. Quando o valor da casa é empty, são adicionadas as 3 jogadas possíveis, a não ser que o número de peças de uma cor seja 0.  
+Estas jogadas são guardadas na lista "FinalListOfMoves" e são posteriormente usadas para simulação dos tabuleiros possiveis de obter quando se calcula a jogada da inteligência artificial.  
+Este predicado revelou-se bastante util e eficáz para a ajuda da simulação de todos os possiveis tabuleiros tendo em conta o estado atual, visto ter uma execução bastante rápida e consistente.
 
 ### Execução de jogadas
 O predicado de execução de jogadas é o predicado move/3.
@@ -188,6 +194,38 @@ get_move([Line,Diagonal,Color],Board, NPieces):-
         is_empty(Line,Diagonal,Board),!, 
     get_color(Color,NPieces).
 ```
+
+A validação é feita pelas funções valid_color\2, aquando do read da diagonal (get_diagonal\2) e linha (get_line\1) e posteriormente, após ter os inputs todos, pela função is_empty\3, que verifica se a casa que se pretende jogar está vazia ou não. Caso não esteja vazia é pedida uma nova jogada.  
+A jogada é feita iterando as linhas do game state (get_row\4), e quando se alcança a linha pretendida, é utilizado o predicado replace_val\4 para substituir na diagonal correta a peça que foi recebida como input. O novo game tabuleiro é guardado em "NewBoard", sendo posteriormente atualizado o game state com este novo tabuleiro.  
+Estas trocas de tabuleiro e obtenção do novo tabuleiro são coordenados pela função move\3.  
+
+```prolog
+% replaces a value in a list
+replace_val([_|T], 0, Value, [Value|T]).
+replace_val([H|T], DiagonalNum, Value, [H|NextValue]):- 
+  DiagonalNum > 0, 
+  NewDiagonalNum is DiagonalNum-1, 
+  replace_val(T, NewDiagonalNum, Value, NextValue).
+
+% Gets a desired row of the board.
+getRow([Row|T],0,[NewRow|T],[InitialRow|V]):-
+    [Diagonal|R] = V,
+    diagonal_index(InitialRow,X),
+    Replace is Diagonal-X,
+    [Color|_] = R,
+    replace_val(Row,Replace,Color,NewRow).
+
+getRow([H|T],RowNumber,[H|NewBoard],Move):-
+    RowNumber > 0,
+    NewRowNumber is RowNumber-1,
+    getRow(T,NewRowNumber,NewBoard,Move).
+
+% Used to make the player's move.
+move([Board | T ], Move, NewGameState):-
+    [RowNumber|_] = Move,
+    getRow(Board,RowNumber,NewBoard,Move),
+    NewGameState = [NewBoard|T].
+ ```
 
 ### Final do jogo
 O predicado game_over/2 é responsável por verificar o número de cores ganhas por cada jogador, retornando o winner em caso de vitória.
@@ -349,7 +387,8 @@ getPathValue([Orange,Purple,Green], 2, [Length,Length1,Length2], _ ,PathValue):-
     get_Value(Green,Length2,PlayerValue2),
     PathValue is PlayerValue + PlayerValue1 + PlayerValue2.
 ```
-Este predicado aproveita-se do tamanho dos caminhos calculados anteriormente. Optamos por atribuir 400 pontos a cada cor ganha e -400 por cada cor perdida, somando a estes valores a constante 9 - o tamanho do caminho mais curto de cada cor, sendo esta subtração elevada a 3 para valorizar cada vez mais distâncias mais curtas. No caso do nível hard de dificuldade é também subtraído o valor final dos caminhos do adversário que está sujeito às mesmas operações aritméticas.
+Este predicado aproveita-se do tamanho dos caminhos calculados anteriormente. Optamos por atribuir 400 pontos a cada cor ganha e -400 por cada cor perdida, somando a estes valores a constante 9 - o tamanho do caminho mais curto de cada cor, sendo esta subtração elevada a 3 para valorizar cada vez mais distâncias mais curtas. No caso do nível hard de dificuldade é também subtraído o valor final dos caminhos do adversário que está sujeito às mesmas operações aritméticas.  
+Estes predicados são coordenados pelo predicado choose_move\4 que tem comportamentos diferentes dependendo da dificuldade da IA.  
 
 ### Jogada do computador
 A jogada do computador é feita no predicado choose_move/4.
@@ -400,7 +439,12 @@ canImprove(Value,Value,GameState,T,Player,BotDiff,Move,BestMove,FinalBestMove):-
 canImprove(_,BestMoveValue,GameState,T,Player,BotDiff,_,BestMove,FinalBestMove):-
     simMoves(GameState,T,Player,BotDiff,BestMove,BestMoveValue,FinalBestMove).
 ```
-O objetivo deste predicado é simular todos as jogadas disponíveis, avaliando o tabuleiro no final de cada, guardando o maior valor e as maiores jogadas. No final de cada move simulado é chamado canImprove, que verifica se o move avaliado é superior ao melhor move no momento. Caso existam mais do que uma jogada com o mesmo valor, são todas guardadas numa lista da qual será escolhida uma jogada aleatória entre as melhores jogadas possiveis.
+O objetivo deste predicado é simular todos as jogadas disponíveis, avaliando o tabuleiro no final de cada, guardando o maior valor e as maiores jogadas. No final de cada move simulado é chamado canImprove, que verifica se o move avaliado é superior ao melhor move no momento. Caso existam mais do que uma jogada com o mesmo valor, são todas guardadas numa lista da qual será escolhida uma jogada aleatória entre as melhores jogadas possiveis.  
+A lista de jogadas possiveis são obtidas pelo predicado valid_moves.  
+Quando se decide numa jogada entre as melhores jogadas possiveis, essa jogada é guardada sendo posteriormente utilizada no predicado move\3 para a realizar no tabuleiro, passando depois a vez de jogar ao jogador ou à inteligência artificial oponente, dependendo do modo de jogo.  
+Para além disso, dependendo da dificuladadee da IA, o predicado choose_move difere em alguns aspetos.  
+Caso a dificuldade seja fácil, não existe simulação de jogadas nenhuma, apenas escolhe uma jogada aleatória entre todas as jogadas possíveis. Se for média ou difícil, aí já existe processamento dos tabuleiros e simulação de jogadas. Na dificuldade média, para todas as simulações de jogadas apenas o estado do BOT é avaliado não tendo em conta se aquela jogada ajuda ou não o oponente, mas na difícil isso já esta a ser considerado, fazendo o BOT escolher jogadas que tentam prejudicar o oponente.
+
 
 ## Conclusões
 Em suma, no final deste projeto consideramos que ficamos mais familiarizados com a linguagem prolog e com programação lógica em geral.  <br/>
