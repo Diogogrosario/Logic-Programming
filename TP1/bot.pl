@@ -9,8 +9,8 @@ captured_color_value(Player, ColorsWon,ColorValue):-
     count_occurrences(ColorsWon,Player,CountOfPlayer),
     NewP is mod(Player+1,2),
     count_occurrences(ColorsWon,NewP,CountOfOpponent),
-    AuxValue is 0 + CountOfPlayer * 400,
-    ColorValue is AuxValue - (CountOfOpponent * 400).
+    AuxValue is 0 + CountOfPlayer * 900,
+    ColorValue is AuxValue - (CountOfOpponent * 900).
 
 % Used to create the list of valid moves. When iterating the board it checks if the tile is empty. 
 % If it is, one possible move is added for every color of piece if there are still any remaining.
