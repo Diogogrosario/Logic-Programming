@@ -51,17 +51,18 @@ mySelValores(Var, _Rest, BB, BB1) :-
 selRandom(ListOfVars, Var, Rest):-
     random_select(Var, ListOfVars, Rest). % da library(random)
 
-make_distinct(X,X,F,1):-
-    nvalue(2,F).
+% make_distinct(X,Y,F,1):-
+%     X #= Y,
+%     nvalue(2,F).
 
 make_distinct(X,Y,F,1):-
     X #\= Y,
     K #= 3 #\/ K #= 2,
     nvalue(K,F).
 
-make_distinct(X,X,F,2):-
-    K #= 5 #\/ K #= 4 #\/ K #= 3,
-    nvalue(K,F).
+% make_distinct(X,X,F,2):-
+%     K #= 5 #\/ K #= 4 #\/ K #= 3,
+%     nvalue(K,F).
 
 make_distinct(X,Y,F,2):-
     X #\= Y,
@@ -82,9 +83,11 @@ generatePuzzle(Difficulty, L1, L2, Sol):-
     convertNumberToList(RandomColors,Result,Sol,[]),
     append(L1,L2, L),
     append(L, Sol, F),
+
     make_distinct(X,Y,F,Difficulty),
+
     length(F,Leng),
-    getDiffLength(Difficulty,ExpectLeng).
+    getDiffLength(Difficulty,ExpectLeng),
     Leng#=ExpectLeng,
 
     labeling([value(mySelValores), variable(selRandom)],[X,Y]), write(X), nl, write(Y),nl, write(Result), nl, write(F), nl, write(NoDups).

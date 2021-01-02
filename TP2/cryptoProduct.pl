@@ -6,6 +6,7 @@
 :- include('solver.pl').
 :- include('menus.pl').
 :- include('puzzles.pl').
+:- include('difficultiesToValues.pl').
 
 crypto_product :- 
     prompt(_,''),
