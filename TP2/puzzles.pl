@@ -13,3 +13,5 @@ puzzle(12,[G],[G,R],[R,G,G]).
 puzzle(13,[R],[R,B],[G,B,G]).
 puzzle(14,[B],[B,R],[G,R,R]).
 puzzle(15,[G],[G,B],[B,B,R]).
+
+colors(['R','G','B','W','O','Y','P','C','M','T']).

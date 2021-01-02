@@ -1,10 +1,11 @@
 :- use_module(library(lists)).
 :- use_module(library(between)).
 :- use_module(library(clpfd)).
+:- use_module(library(random)).
 
 :- include('solver.pl').
 :- include('menus.pl').
-:- include('puzzels.pl').
+:- include('puzzles.pl').
 
 crypto_product :- 
     prompt(_,''),

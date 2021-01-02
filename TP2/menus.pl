@@ -22,6 +22,15 @@ mode_menu(1):-
     puzzle(Puzzle,L1,L2,Sol),
     crypto_user(L1, L2, Sol).
     
+mode_menu(2):-
+    repeat,
+        nl, write('   ----------------------------------------------------------------------------------------------'), nl, nl,
+        write('1) Easy .'), nl,
+        write('2) Medium.'), nl,
+        catch(read(AuxDiff),_,true), number(AuxDiff),
+        between(1,2,AuxDiff), !,
+    Difficulty = AuxDiff,
+    generatePuzzle(Difficulty, L1, L2, Sol).
 
 
 main_menu(Mode):-
@@ -29,6 +38,7 @@ main_menu(Mode):-
      repeat,
         nl, write('   ----------------------------------------------------------------------------------------------'), nl, nl,
         write('1) Solve a puzzle.'), nl,
+        write('2) Generate a random puzzle.'), nl,
         catch(read(AuxMode),_,true), number(AuxMode),
-        between(1,1,AuxMode), !,
+        between(1,2,AuxMode), !,
     Mode = AuxMode.
