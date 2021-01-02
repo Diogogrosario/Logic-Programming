@@ -69,6 +69,11 @@ make_distinct(X,Y,F,2):-
     K #= 6 #\/ K #= 5 #\/ K #= 4 #\/ K #= 3,
     nvalue(K,F).
 
+getCharsList([],_,[]).
+getCharsList([HN|TN],Colors,[Elem|ET]):-
+    nth0(HN,Colors,Elem),
+    getCharsList(TN,Colors,ET).
+
 generatePuzzle(Difficulty, L1, L2, Sol):-
     AuxDiff is Difficulty - 1,
     MaxNumberLength is integer(exp(10,Difficulty)),
@@ -90,6 +95,13 @@ generatePuzzle(Difficulty, L1, L2, Sol):-
     getDiffLength(Difficulty,ExpectLeng),
     Leng#=ExpectLeng,
 
-    labeling([value(mySelValores), variable(selRandom)],[X,Y]), write(X), nl, write(Y),nl, write(Result), nl, write(F), nl, write(NoDups).
+    labeling([value(mySelValores), variable(selRandom)],[X,Y]), 
+
+    colors(Aux),
+    random_permutation(Aux,Colors),
+    getCharsList(L1,Colors, LChar1),
+    getCharsList(L2,Colors, LChar2),
+    getCharsList(Sol,Colors, SolChar),
+    print_results(LChar1,LChar2,SolChar).
     
 
