@@ -30,13 +30,13 @@ crypto_user(MultLeft, MultRight, Sol):-
     labeling([],NoDups),
     print_results(MultLeft,MultRight,Sol).
 
-convertNumberToList(Colors,0,List,List).
-convertNumberToList(Colors,Number,List,Acc):-
+convertNumberToList(0,List,List).
+convertNumberToList(Number,List,Acc):-
     Number #> 0,
     NewNumber #= Number div 10,
     Digit #= Number mod 10,
     NewAcc = [Digit|Acc],
-    convertNumberToList(Colors,NewNumber,List,NewAcc).
+    convertNumberToList(NewNumber,List,NewAcc).
 
 mySelValores(Var, _Rest, BB, BB1) :-
     fd_set(Var, Set), fdset_to_list(Set, List),
@@ -51,18 +51,10 @@ mySelValores(Var, _Rest, BB, BB1) :-
 selRandom(ListOfVars, Var, Rest):-
     random_select(Var, ListOfVars, Rest). % da library(random)
 
-% make_distinct(X,Y,F,1):-
-%     X #= Y,
-%     nvalue(2,F).
-
 make_distinct(X,Y,F,1):-
     X #\= Y,
     K #= 3 #\/ K #= 2,
     nvalue(K,F).
-
-% make_distinct(X,X,F,2):-
-%     K #= 5 #\/ K #= 4 #\/ K #= 3,
-%     nvalue(K,F).
 
 make_distinct(X,Y,F,2):-
     X #\= Y,
@@ -74,7 +66,7 @@ getCharsList([HN|TN],Colors,[Elem|ET]):-
     nth0(HN,Colors,Elem),
     getCharsList(TN,Colors,ET).
 
-generatePuzzle(Difficulty, L1, L2, Sol):-
+generatePuzzle(Difficulty):-
     AuxDiff is Difficulty - 1,
     MaxNumberLength is integer(exp(10,Difficulty)),
     MinNumberLength is integer(exp(10, AuxDiff)),
@@ -83,9 +75,9 @@ generatePuzzle(Difficulty, L1, L2, Sol):-
     X #> Y,
     Result #= X * Y,
 
-    convertNumberToList(RandomColors,X,L1,[]),
-    convertNumberToList(RandomColors,Y,L2,[]),
-    convertNumberToList(RandomColors,Result,Sol,[]),
+    convertNumberToList(X,L1,[]),
+    convertNumberToList(Y,L2,[]),
+    convertNumberToList(Result,Sol,[]),
     append(L1,L2, L),
     append(L, Sol, F),
 
@@ -105,3 +97,41 @@ generatePuzzle(Difficulty, L1, L2, Sol):-
     print_results(LChar1,LChar2,SolChar).
     
 
+
+generatePuzzle(3):-
+    repeat,
+        write('Number of digits for one number (between 4 and 9)'), nl,
+        catch(read(DigitX),_,true), number(DigitX),
+        between(4,9,DigitX), !,
+    repeat,
+        write('Number of digits for the other number (between 4 and 9)'), nl,
+        catch(read(DigitY),_,true), number(DigitY),
+        between(4,9,DigitY), !,
+    generateCustomPuzzle(DigitX, DigitY).
+
+
+generateCustomPuzzle(DigitX, DigitY):-
+    AuxX is DigitX - 1,
+    LowerX is integer(exp(10,AuxX)),
+    UpperX is integer(exp(10,DigitX)) - 1,
+
+    AuxY is DigitY - 1,
+    LowerY is integer(exp(10,AuxY)),
+    UpperY is integer(exp(10,DigitY)) - 1,
+
+    X in LowerX..UpperX,
+    Y in LowerY..UpperY,
+    Result #= X * Y,
+
+    convertNumberToList(X,L1,[]),
+    convertNumberToList(Y,L2,[]),
+    convertNumberToList(Result,Sol,[]), 
+
+    labeling([value(mySelValores), variable(selRandom)],[X,Y]),
+
+    colors(Aux),
+    random_permutation(Aux,Colors),
+    getCharsList(L1,Colors, LChar1),
+    getCharsList(L2,Colors, LChar2),
+    getCharsList(Sol,Colors, SolChar),
+    print_results(LChar1,LChar2,SolChar).

@@ -27,10 +27,11 @@ mode_menu(2):-
         nl, write('   ----------------------------------------------------------------------------------------------'), nl, nl,
         write('1) Easy .'), nl,
         write('2) Medium.'), nl,
+        write('3) Custom.'), nl,
         catch(read(AuxDiff),_,true), number(AuxDiff),
-        between(1,2,AuxDiff), !,
+        between(1,3,AuxDiff), !,
     Difficulty = AuxDiff,
-    generatePuzzle(Difficulty, L1, L2, Sol).
+    generatePuzzle(Difficulty).
 
 
 main_menu(Mode):-
