@@ -1,3 +1,4 @@
+% pre-loaded puzzle to test the solver.
 puzzle(1,[R],[G,R],[B,G]).
 puzzle(2,[B],[B,G],[R,R,R]).
 puzzle(3,[G],[G,B],[B,R,G]).
@@ -14,4 +15,5 @@ puzzle(13,[R],[R,B],[G,B,G]).
 puzzle(14,[B],[B,R],[G,R,R]).
 puzzle(15,[G],[G,B],[B,B,R]).
 
+% available colors for the puzzle generator
 colors(['R','G','B','W','O','Y','P','C','M','T']).
