@@ -20,6 +20,12 @@ print_results(MultLeft,MultRight,Sol):-
     write(' = '),
     printList(Sol).
 
+% reset_timer :- statistics(walltime,_).	
+% print_time :-
+% 	statistics(walltime,[_,T]),
+% 	TS is ((T//10)*10)/1000,
+% 	nl, write('Time: '), write(T), write('ms'), nl, nl.
+
 % solver for the crypto puzzle
 crypto_user(MultLeft, MultRight, Sol):-
     setValDomain(MultLeft,1, LeftVal, 0),
@@ -31,7 +37,12 @@ crypto_user(MultLeft, MultRight, Sol):-
     remove_dups(F,NoDups),
     all_distinct(NoDups),
     SolVal #= LeftVal * RightVal,
-    labeling([],NoDups),
+    
+    % reset_timer,
+    labeling([ ff, enum ],NoDups),
+    % print_time,
+    % fd_statistics,
+
     print_results(MultLeft,MultRight,Sol).
 
 % converts a number to a list with it's digits (for example 123 becomes [1,2,3])
@@ -139,7 +150,10 @@ generateCustomPuzzle(DigitX, DigitY):-
     convertNumberToList(Y,L2,[]),
     convertNumberToList(Result,Sol,[]), 
 
+    % reset_timer,
     labeling([value(mySelValores), variable(selRandom)],[X,Y]),
+    % print_time,
+    % fd_statistics,
 
     colors(Aux),
     random_permutation(Aux,Colors),
