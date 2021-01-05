@@ -7,6 +7,7 @@
 :- include('menus.pl').
 :- include('puzzles.pl').
 :- include('difficultiesToValues.pl').
+:- include('generator.pl').
 
 crypto_product :- 
     prompt(_,''),
